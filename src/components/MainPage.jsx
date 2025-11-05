@@ -1,6 +1,6 @@
   import React, { useEffect, useRef } from 'react';
   import { useNavigate } from 'react-router-dom';
-import fallbackImage from "../assets/logo new new new.png"; // <- update filename/path if needed
+import fallbackImage from "../assets/logo.png"; // <- update filename/path if needed
 import bgVideo from "../assets/bgvideo.mp4"; // <- update filename/path if needed
 
   const MainPage = () => {
