@@ -30,7 +30,7 @@ export const Footer = () =>{
     <div className="z-50 text-center flex flex-col items-center gap-3 lg:gap-4">
       <img 
         className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 lg:h-30 lg:w-30 object-contain" 
-        src="src/assets/logo new new new.png" 
+        src="src/assets/logo.png" 
         alt="Elf Amor Logo" 
       />
       {/* <p className="text-xs sm:text-xs md:text-xs text-gray-700 font-medium">
