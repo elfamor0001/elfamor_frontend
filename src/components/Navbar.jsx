@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Menu, X, ShoppingBag, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import logoImg from "../assets/logo.png";
 
 // Navbar Component
 export const Navbar = ({ currentPage, setCurrentPage }) => {
@@ -146,7 +147,7 @@ export const Navbar = ({ currentPage, setCurrentPage }) => {
                 onClick={navigateToHome}
                 className=""
               >
-                <img className='h-20 w-20' src="/src/assets/logo.png" alt="" />
+                <img className='h-20 w-20' src={logoImg} alt="" />
               </a>
             </div>
 
