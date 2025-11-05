@@ -146,7 +146,7 @@ export const Navbar = ({ currentPage, setCurrentPage }) => {
                 onClick={navigateToHome}
                 className=""
               >
-                <img className='h-20 w-20' src="src/assets/logo.png" alt="" />
+                <img className='h-20 w-20' src="/src/assets/logo.png" alt="" />
               </a>
             </div>
 
