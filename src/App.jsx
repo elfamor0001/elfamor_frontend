@@ -16,6 +16,7 @@ import AboutUs from './pages/AboutUs.jsx';
 import OrderHistoryPage from './pages/OrderHistoryPage.jsx';
 import OrderSuccessPage from './pages/OrderSuccessPage.jsx';
 import CheckoutPage from './pages/CheckoutPage.jsx';
+import OrderDetailPage from './pages/OrderDetailPage.jsx';
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState('home');
@@ -40,6 +41,7 @@ const App = () => {
         <Route path='/about' element={<AboutUs/>} />
         <Route path='/order-success' element={<OrderSuccessPage/>} />
         <Route path='/checkout' element={<CheckoutPage/>} />
+        <Route path='/orders/:orderId' element={<OrderDetailPage/>} />
       </Routes>
       
       {/* Footer */}
