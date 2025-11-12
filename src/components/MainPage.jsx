@@ -424,7 +424,12 @@ const MainPage = () => {
 
   const navigateToAllProducts = () => {
   navigate("/products");
-  window.scrollTo(0, 0);
+  // Scroll to top of the page
+  window.scrollTo({
+    top: 0,
+    left: 0,
+    behavior: 'smooth' // Optional: adds smooth scrolling
+  });
 };
 
   const handleProductClick = (product) => {
