@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+html, body {
+  overflow-x: hidden;
+}
 
 @keyframes revolve {
   0% { transform: rotateY(0deg); }
@@ -124,5 +127,13 @@
 html::-webkit-scrollbar,
 body::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 

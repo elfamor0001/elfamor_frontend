@@ -1,346 +1,537 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { getCSRFToken } from '../context/authUtils';
+
+// prefer an imported fallback so bundlers (CRA/Vite) resolve it correctly
+import FALLBACK_IMG from "../assets/logo.png";
+
+const API_BASE =
+  (typeof window !== "undefined" && window.__API_BASE__) || "https://elfamor.pythonanywhere.com";
+
+const FALLBACK_IMAGE = FALLBACK_IMG || "/logo.png";
+
+// Helper to normalize relative urls returned by backend
+function normalizeImageUrl(url) {
+  if (!url) return null;
+  if (/^https?:\/\//i.test(url)) return url;
+  if (/^\/\//.test(url)) return `${window.location.protocol}${url}`;
+  if (url.startsWith("/")) return `${API_BASE.replace(/\/$/, "")}${url}`;
+  return `${API_BASE.replace(/\/$/, "")}/${url}`;
+}
 
 const ProductDetails = () => {
-  const [selectedSize, setSelectedSize] = useState('');
-  const [hasGiftCard, setHasGiftCard] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [showFullDescription, setShowFullDescription] = useState(false);
-
-  // Sample product images - you can replace these with actual image URLs
-  const productImages = [
-    'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?w=600&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1594736797933-d0b22e9e8819?w=600&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=600&h=600&fit=crop'
-  ];
-
-  // Related products data
-  const products = [
-    {
-      id: 1,
-      name: 'FOREST AMBUSH EMBROIDERY T-SHIRT',
-      price: 'RS. 5,995',
-      image: 'https://images.unsplash.com/photo-1583743814966-8936f37f8302?w=400&h=400&fit=crop',
-      bgColor: 'bg-slate-800'
-    },
-    {
-      id: 2,
-      name: 'EAGLE CRY T-SHIRT',
-      price: 'RS. 4,995',
-      image: 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=400&h=400&fit=crop',
-      bgColor: 'bg-orange-600'
-    },
-    {
-      id: 3,
-      name: 'BLACK TIGER T-SHIRT',
-      price: 'RS. 3,995',
-      image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop',
-      bgColor: 'bg-black'
-    },
-    {
-      id: 4,
-      name: 'RED HUMMINGBIRD T-SHIRT',
-      price: 'RS. 4,495',
-      image: 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=400&h=400&fit=crop',
-      bgColor: 'bg-red-800'
-    }
-  ];
-
-  const sizes = ['XXXS', 'XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
-
+  const { id } = useParams();
   const navigate = useNavigate();
 
-  const navigateToAllProducts = () => {
-    navigate('/products');
-  };
-  const navigateToProductDetails = () => {
-    navigate('/productdetails');
+  const [product, setProduct] = useState(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading] = useState(Boolean(id));
+  const [error, setError] = useState("");
+  const [itemActionLoading, setItemActionLoading] = useState(false);
+
+  // NEW: suggested products state
+  const [suggestedProducts, setSuggestedProducts] = useState([]);
+  const [suggestedLoading, setSuggestedLoading] = useState(true);
+  const [suggestedError, setSuggestedError] = useState("");
+
+  const prevQtyRef = useRef(0);
+
+  useEffect(() => {
+    // Simpler fetch flow (same as your working ProductDetailPage):
+    // 1) GET product from /api/products/products/{id}/
+    // 2) if product.images is missing/empty, GET /api/product-images/?product_id={id}
+    // This is intentionally simpler and more robust for your backend shape.
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    const fetchProduct = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const res = await fetch(`${API_BASE}/api/products/products/${id}/`, {
+          method: "GET",
+          credentials: "include",
+          headers: { Accept: "application/json" },
+          signal,
+        });
+
+        if (!res.ok) {
+          // handle non-OK
+          const txt = await res.text().catch(() => "");
+          throw new Error(`${res.status} ${res.statusText} - ${txt.slice(0, 200)}`);
+        }
+
+        const productData = await res.json();
+
+        // If images aren't included in the main product response, fetch them separately
+        if (!productData.images || productData.images.length === 0) {
+          try {
+            const imagesRes = await fetch(`${API_BASE}/api/product-images/?product_id=${id}`, {
+              method: "GET",
+              credentials: "include",
+              headers: { Accept: "application/json" },
+              signal,
+            });
+            if (imagesRes.ok) {
+              const imagesData = await imagesRes.json();
+              productData.images = imagesData.results || imagesData || [];
+            }
+          } catch (imgErr) {
+            // don't fail entire product load if image endpoint fails; just leave images absent
+            // eslint-disable-next-line no-console
+            console.warn("product images fetch failed:", imgErr);
+          }
+        }
+
+        if (!signal.aborted) {
+          setProduct(productData);
+          setCurrentImageIndex(0);
+        }
+      } catch (err) {
+        if (!signal.aborted) {
+          // eslint-disable-next-line no-console
+          console.error("Error fetching product:", err);
+          setError(err.message || "Failed to fetch product");
+        }
+      } finally {
+        if (!signal.aborted) setLoading(false);
+      }
+    };
+
+    if (id) fetchProduct();
+
+    return () => controller.abort();
+  }, [id]);
+
+  // NEW: fetch suggested products (random 4)
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    const endpoints = [
+      `${API_BASE}/api/products/products/`,
+      // `${API_BASE}/api/products/`,
+      // `${API_BASE}/products/`,
+      // `${API_BASE}/api/products-list/`,
+    ];
+
+    const fetchEndpoint = async (ep) => {
+      const res = await fetch(ep, {
+        method: "GET",
+        credentials: "include",
+        headers: { Accept: "application/json" },
+        signal,
+      });
+      if (!res.ok) {
+        const txt = await res.text().catch(() => "");
+        throw new Error(`${res.status} ${res.statusText} from ${ep} — ${txt.slice(0, 200)}`);
+      }
+      let data;
+      try {
+        data = await res.json();
+      } catch (err) {
+        const txt = await res.text().catch(() => "");
+        throw new Error(`Invalid JSON from ${ep}: ${txt.slice(0, 300)}`);
+      }
+      return Array.isArray(data) ? data : data.results || [];
+    };
+
+    const pickRandom = (arr, n = 4) => {
+      if (!Array.isArray(arr) || arr.length === 0) return [];
+      // Fisher-Yates shuffle (in a copy)
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a.slice(0, n);
+    };
+
+    // derive image URL for a product object (mirrors other logic)
+    const deriveProductImage = (p) => {
+      if (!p) return FALLBACK_IMAGE;
+      if (p.primary_image) {
+        if (typeof p.primary_image === "string") return normalizeImageUrl(p.primary_image) || FALLBACK_IMAGE;
+        if (p.primary_image.url) return normalizeImageUrl(p.primary_image.url) || FALLBACK_IMAGE;
+        if (p.primary_image.image) return normalizeImageUrl(p.primary_image.image) || FALLBACK_IMAGE;
+      }
+      if (Array.isArray(p.images) && p.images.length > 0) {
+        const primary = p.images.find((i) => i.is_primary) || p.images[0];
+        if (typeof primary === "string") return normalizeImageUrl(primary) || FALLBACK_IMAGE;
+        const raw = primary.image || primary.url || primary.image_url || primary.path || primary.file;
+        return normalizeImageUrl(raw) || FALLBACK_IMAGE;
+      }
+      if (p.image) return normalizeImageUrl(p.image) || FALLBACK_IMAGE;
+      if (p.main_image) return normalizeImageUrl(p.main_image) || FALLBACK_IMAGE;
+      if (p.image_url) return normalizeImageUrl(p.image_url) || FALLBACK_IMAGE;
+      return FALLBACK_IMAGE;
+    };
+
+    const fetchSuggested = async () => {
+      setSuggestedLoading(true);
+      setSuggestedError("");
+      setSuggestedProducts([]);
+      let lastErr = null;
+      // try endpoints in parallel but use Promise.any so the fastest successful one is used
+      const tries = endpoints.map((ep) => fetchEndpoint(ep).catch((e) => { throw e; }));
+      try {
+        // Promise.any returns first fulfilled result
+        const items = await Promise.any(tries);
+        const picked = pickRandom(items, 4).map((p) => ({
+          ...p,
+          _image: deriveProductImage(p),
+        }));
+        if (!signal.aborted) {
+          setSuggestedProducts(picked);
+          setSuggestedLoading(false);
+        }
+      } catch (err) {
+        // Promise.any failed -> try endpoints sequentially as fallback to collect errors
+        try {
+          for (const ep of endpoints) {
+            try {
+              const items = await fetchEndpoint(ep);
+              const picked = pickRandom(items, 4).map((p) => ({ ...p, _image: deriveProductImage(p) }));
+              if (!signal.aborted) {
+                setSuggestedProducts(picked);
+                setSuggestedLoading(false);
+              }
+              return;
+            } catch (e) {
+              lastErr = e;
+              continue;
+            }
+          }
+          throw lastErr || new Error("No product endpoints returned data");
+        } catch (finalErr) {
+          if (!signal.aborted) {
+            // eslint-disable-next-line no-console
+            console.error("Suggested products fetch failed:", finalErr);
+            setSuggestedError(finalErr.message || "Failed to fetch suggested products");
+            setSuggestedLoading(false);
+            setSuggestedProducts([]);
+          }
+        }
+      }
+    };
+
+    fetchSuggested();
+
+    return () => controller.abort();
+  }, []); // run once
+
+  // set prev qty only once product is available
+  useEffect(() => {
+    if (!product) return;
+    // const existing = cartItems.find((p) => Number(p.id) === Number(product.id));
+    // prevQtyRef.current = existing ? existing.quantity || 0 : 0;
+
+    if (typeof setPreviewDelta === "function") setPreviewDelta(0);
+    return () => {
+      if (typeof setPreviewDelta === "function") setPreviewDelta(0);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product]);
+
+  // update preview delta when quantity changes (only if product is loaded)
+  useEffect(() => {
+    if (typeof setPreviewDelta !== "function" || !product) return;
+    const existing = cartItems.find((p) => Number(p.id) === Number(product.id));
+    const existingQty = existing ? existing.quantity || 0 : 0;
+    setPreviewDelta(quantity - existingQty);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quantity, product]);
+
+  const increment = () => setQuantity((q) => Math.min(10, q + 1));
+  const decrement = () => setQuantity((q) => Math.max(1, q - 1));
+
+  // Enhanced Add to Cart functionality from first code
+ const handleAddToCart = () => {
+    // Add to cart logic: POST to backend cart endpoint
+    (async () => {
+      try {
+        const csrfToken = await getCSRFToken();
+        const res = await fetch('https://elfamor.pythonanywhere.com/api/cart/add/', {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+          },
+          body: JSON.stringify({ product_id: product.id, quantity }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          // Simple feedback: console and navigate to cart if desired
+          console.log('Added to cart', data);
+          // Optionally navigate to cart or show a toast
+          // navigate('/cart');
+          alert(`Added ${quantity} x ${product.name} to cart`);
+        } else if (res.status === 401) {
+          // Not authenticated
+          alert('Please log in to add items to your cart');
+          navigate('/auth');
+        } else {
+          const err = await res.json().catch(() => null);
+          console.error('Failed to add to cart', err);
+          alert((err && err.error) || 'Failed to add item to cart');
+        }
+      } catch (err) {
+        console.error('Add to cart error', err);
+        alert('Could not add item to cart — check console for details');
+      }
+    })();
   };
 
-  const fullDescription = `BUILT FOR GRIND AND GLORY, THE TRAINING KIT JERSEY IN NAVY AND GREY IS ALL ABOUT FUNCTION MEETING FORM. WHETHER YOU'RE PUTTING IN THE WORK OR REPPING THE CULTURE, THIS PIECE CARRIES THE RELENTLESS ENERGY OF BUDWEISER AND THE REFINED TOUGHNESS OF BLUORG. UNDERSTATED, SHARP, AND MADE TO MOVE WITH YOU.`;
-  
-  const shortDescription = fullDescription.slice(0, 150) + '...';
+  const navigateToAllProducts = () => navigate("/products");
+
+  if (!id) {
+    return (
+      <div className="min-h-screen bg-[#EFEFEF] p-6">
+        <div className="text-red-600 mb-4">Invalid product URL (missing id).</div>
+        <button onClick={navigateToAllProducts} className="px-3 py-2 bg-black text-white rounded">
+          Back to products
+        </button>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#EFEFEF] p-4 flex justify-center items-center">
+        <div className="animate-pulse">Loading product…</div>
+      </div>
+    );
+  }
+
+  if (error && !product) {
+    return (
+      <div className="min-h-screen bg-[#EFEFEF] p-6">
+        <div className="text-red-600 mb-4">Error: {error}</div>
+        <button onClick={navigateToAllProducts} className="px-3 py-2 bg-black text-white rounded">
+          Back to products
+        </button>
+        <div className="mt-6 text-sm text-gray-600">
+          Note: If the browser console shows CORS errors (no Access-Control-Allow-Origin), enable your frontend origin in Django's CORS settings (or allow all origins for dev).
+        </div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-[#EFEFEF] p-6">
+        <div>No product found.</div>
+        <button onClick={navigateToAllProducts} className="mt-4 px-3 py-2 bg-black text-white rounded">
+          Back to products
+        </button>
+      </div>
+    );
+  }
+
+  // helper to get a thumbnail src for an image object returned by your backend
+  const thumbSrc = (imgObj) => {
+    if (!imgObj) return FALLBACK_IMAGE;
+    // prefer common fields then normalize if needed
+    const raw = imgObj.image_url || imgObj.image || imgObj.url || imgObj.path || imgObj.file || imgObj.media;
+    return normalizeImageUrl(raw) || FALLBACK_IMAGE;
+  };
+
+  // get main displayed image (from product.images based on currentImageIndex)
+  const getDisplayedSrc = () => {
+    if (product.images && product.images.length > 0) {
+      const chosen = product.images[currentImageIndex] || product.images[0];
+      return thumbSrc(chosen);
+    }
+    // fallback to product-level image fields if present
+    const raw =
+      product.primary_image?.url ||
+      product.primary_image?.image ||
+      product.primary_image ||
+      product.image ||
+      product.main_image ||
+      product.image_url;
+    return normalizeImageUrl(raw) || FALLBACK_IMAGE;
+  };
+
+  const imgs = (product.images && product.images.length > 0)
+    ? product.images
+    : [
+        // if no images array, attempt to derive from product-level fields
+        { id: "primary", image_url: product.primary_image?.url || product.primary_image || product.image || product.image_url || product.main_image }
+      ];
+
+  const displayed = getDisplayedSrc();
 
   return (
-    <div className="min-h-screen bg-[#EFEFEF] text-xs lg:py-20">
-      {/* Navigation Breadcrumb */}
-      <div className="px-4 py-3  text-gray-700 text-xs">
-        HOME › ALL PRODUCTS › TRAINING KIT JERSEY
-      </div>
-
-      {/* Mobile Layout */}
-      <div className="block lg:hidden pt-12">
-        <div className="space-y-4 px-1">
-          {/* Mobile Image Gallery - Horizontal Scroll */}
-            <div 
-              className="flex overflow-x-auto snap-x snap-mandatory"
-              style={{
-                msOverflowStyle: 'none',
-                scrollbarWidth: 'none',
-                WebkitOverflowScrolling: 'touch'
-              }}
-            >
-              
-              {productImages.map((image, index) => (
-                <div key={index} className="aspect-square flex-shrink-0 w-full snap-center">
+    <div className="min-h-screen bg-[#efefef] text-sm lg:py-12 mt-21">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-[80px_1fr_500px] gap-6 items-start">
+          {/* Thumbnails: vertical on lg, horizontal on mobile */}
+          <div className="order-2 lg:order-1">
+            <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-visible py-2">
+              {imgs.map((imgObj, idx) => (
+                <button
+                  key={imgObj.id ?? idx}
+                  onClick={() => setCurrentImageIndex(idx)}
+                  className={`flex-shrink-0 w-20 h-20 p-1 rounded-md overflow-hidden border ${idx === currentImageIndex ? "border-gray-800" : "border-gray-200"}`}
+                >
                   <img
-                    src={image}
-                    alt={`Training Kit Jersey ${index + 1}`}
+                    src={thumbSrc(imgObj)}
+                    alt={`thumb-${idx}`}
                     className="w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = FALLBACK_IMAGE;
+                    }}
                   />
-                </div>
+                </button>
               ))}
             </div>
+          </div>
 
-            
-
-          {/* Mobile Product Info */}
-          <div className="p-2 space-y-4">
-              <h1 className="mb-1">TRAINING KIT JERSEY</h1>
-              <p className="font-bold text-gray-500">RS. 5,995</p>
-
-            {/* Mobile Size Selection */}
-            <div>
-              
-              <div className="grid grid-cols-5 sm:grid-cols-6 gap-2">
-                {sizes.map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`border py-2 px-2 rounded-md text-gray-700 transition-all ${
-                      selectedSize === size
-                        ? 'border-gray-700'
-                        : 'border-gray-300 hover:border-gray-400'
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Mobile Gift Card */}
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="mobileGiftCard"
-                checked={hasGiftCard}
-                onChange={(e) => setHasGiftCard(e.target.checked)}
-                className="w-4 h-4"
+          {/* Main image */}
+          <div className="order-1 lg:order-2 flex justify-center items-center">
+            <div className="w-full max-h-[80vh] flex items-center justify-center bg-[#efefef] py-4 rounded">
+              <img
+                src={displayed}
+                alt="main"
+                className="max-h-[80vh] max-w-full object-contain"
+                loading="lazy"
+                decoding="async"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = FALLBACK_IMAGE;
+                }}
               />
-              <label htmlFor="mobileGiftCard" className="text-gray-700 font-semibold">
-                HAVE A GIFT CARD?
-              </label>
-            </div>
-
-            {/* Mobile Action Buttons */}
-            <div className="space-y-1">
-              <button className="w-full bg-black rounded-md text-white py-3 px-6 transition-all">
-                BUY NOW
-              </button>
-              <button className="w-full border-1 rounded-md border-gray-700 text-gray-700 py-3 px-6 transition-all">
-                ADD TO CART
-              </button>
             </div>
           </div>
 
-          {/* Mobile Description - Collapsible */}
-          <div className="bg-white border-gray-700 border-1 rounded-md p-3 sm:p-4 lg:p-2 space-y-4 sm:space-y-6 lg:space-y-4">
-  {/* Description Section */}
-  <div className='flex flex-col sm:flex-row sm:justify-around lg:justify-around'>
-    <h3 className="mb-2 sm:mb-3 tracking-tighter text-gray-700 text-sm sm:text-base lg:text-sm font-medium sm:w-1/3 lg:w-auto">
-      DESCRIPTION
-    </h3>
-    <p className="tracking-tighter text-gray-500 text-sm sm:text-base lg:text-sm sm:w-2/3 lg:w-1/2">
-      {showFullDescription ? fullDescription : shortDescription}
-      <button 
-        onClick={() => setShowFullDescription(!showFullDescription)}
-        className="underline hover:no-underline font-medium ml-1"
-      >
-        {showFullDescription ? 'Read Less' : 'Read More'}
-      </button>
-    </p>
-  </div>
+          {/* Details */}
+          <div className="order-3 lg:order-3">
+            <div className="space-y-4 px-2 py-4 lg:p-6 bg-[#efefef] rounded">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h1 className="text-2xl font-bold">{product.name}</h1>
+                  {product.volume_ml && <h4 className="text-sm text-gray-400 mt-1">{product.volume_ml}ml</h4>}
+                </div>
+                <div className="mt-1">
+                  <div className="sm:text-md lg:text-lg font-semibold">RS. {product.price ?? product.price_display ?? "—"}</div>
+                </div>
+              </div>
 
-  {/* Details Section */}
-  <div className='flex flex-col sm:flex-row sm:justify-around lg:justify-around'>
-    <h3 className="mb-2 sm:mb-3 tracking-tighter text-gray-700 text-sm sm:text-base lg:text-sm font-medium sm:w-1/3 lg:w-1/2">
-      DETAILS
-    </h3>
-    <div className="space-y-1 tracking-tighter text-gray-500 text-sm sm:text-base lg:text-sm sm:w-2/3">
-      <p>REGULAR FIT WITH ATHLETIC STRETCH</p>
-      <p>100% POLYESTER</p>
-      <p>WEIGHT - 225 GSM</p>
-      <p>DIGITAL AND HIGH-DENSITY PRINT</p>
-      <p>MACHINE WASH ONLY</p>
-    </div>
-  </div>
-
-  {/* Shipping Section */}
-  <div className='flex flex-col sm:flex-row sm:justify-around lg:justify-around'>
-    <h3 className="mb-2 sm:mb-3 tracking-tighter text-gray-700 text-sm sm:text-base lg:text-sm font-medium sm:w-1/3 lg:w-auto">
-      SHIPPING
-    </h3>
-    <div className="space-y-1 tracking-tighter text-gray-500 text-sm sm:text-base lg:text-sm sm:w-2/3">
-      <p>PRE-ORDER.</p>
-      <p>FREE DELIVERY PAN-INDIA.</p>
-      <p>DISPATCH ON AUGUST 02.</p>
-    </div>
-  </div>
-</div>
-        </div>
-      </div>
-
-      {/* Desktop Layout */}
-      <div className="hidden lg:flex h-screen text-[9px]">
-        {/* Left Content - Fixed */}
-        <div className="w-96 md:w-1/3 xl:w-1/3 overflow-y-auto">
-          <div className="absolute md:w-1/3 xl:w-1/3 bottom-0 p-10 space-y-5 ">
-            {/* Product Title and Price */}
-            <div className='flex justify-between'>
-              <h1 className="font-medium">TRAINING KIT JERSEY</h1>
-              <p className="font-semibold text-gray-500">RS. 5,995</p>
-            </div>
-
-            {/* Description */}
-            <div className='text-gray-700 tracking-tight'>
-              <h3 className="mb-1 font-semibold">DESCRIPTION</h3>
-              <p className="leading-relaxed">
-                {showFullDescription ? fullDescription : shortDescription}
-                <button 
-                  onClick={() => setShowFullDescription(!showFullDescription)}
-                  className="hover:underline font-medium text-gray-700 hover:cursor-pointer"
+              {/* Enhanced Action Buttons from first code */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleAddToCart}
+                  disabled={itemActionLoading}
+                  className={`flex-1 bg-black text-white py-3 rounded-md font-semibold hover:bg-gray-800 transition-colors duration-300 ${
+                    itemActionLoading ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
                 >
-                  {showFullDescription ? 'Read Less' : 'Read More'}
+                  {itemActionLoading ? 'ADDING...' : 'ADD TO CART'}
                 </button>
-              </p>
-            </div>
 
-            {/* Details */}
-            <div className='text-gray-700 tracking-tight'>
-              <h3 className="font-semibold mb-1">DETAILS</h3>
-              <div className="space-y-1 ">
-                <p>REGULAR FIT WITH ATHLETIC STRETCH</p>
-                <p>100% POLYESTER</p>
-                <p>WEIGHT - 225 GSM</p>
-                <p>DIGITAL AND HIGH-DENSITY PRINT</p>
-                <p>MACHINE WASH ONLY</p>
-              </div>
-            </div>
-
-            {/* Shipping */}
-            <div className='text-gray-700 tracking-tight'>
-              <h3 className="font-semibold mb-1">SHIPPING</h3>
-              <div className="space-y-1">
-                <p>PRE-ORDER.</p>
-                <p>FREE DELIVERY PAN-INDIA.</p>
-                <p>DISPATCH ON AUGUST 02.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Center - Vertically Scrollable Photo Gallery */}
-        <div className="flex-1 h-10/12 relative overflow-y-auto" style={{
-    msOverflowStyle: 'none',
-    scrollbarWidth: 'none',
-    WebkitOverflowScrollbar: { display: 'none' }}}>
-          <div className="space-y-0.5">
-            {productImages.map((image, index) => (
-              <div key={index} className="flex items-center justify-center">
-                <img
-                  src={image}
-                  alt={`Training Kit Jersey ${index + 1}`}
-                  className="w-full object-contain"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Right Content - Fixed */}
-        <div className="w-96 xl:w-1/3 overflow-y-auto text-gray-700">
-          <div className="bottom-0 xl:w-1/3 p-10 absolute right-0 space-y-4">
-            {/* Size Selection */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold">SIZE</h3>
-              </div>
-              
-              <div className="grid grid-cols-5 gap-1 mb-1">
-                {sizes.slice(0).map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`border py-2 px-3 transition-all rounded-md hover:cursor-pointer ${
-                      selectedSize === size
-                        ? 'border-gray-700'
-                        : 'border-gray-300 hover:border-gray-700'
-                    }`}
+                <div className="flex items-center border rounded-md">
+                  <button 
+                    onClick={decrement} 
+                    disabled={itemActionLoading}
+                    className="px-3 py-2 bg-gray-100 rounded-l-md hover:bg-gray-200 transition-colors"
                   >
-                    {size}
+                    -
                   </button>
-                ))}
+                  <div className="px-4 py-2 font-medium">{quantity}</div>
+                  <button 
+                    onClick={increment} 
+                    disabled={itemActionLoading}
+                    className="px-3 py-2 bg-gray-100 rounded-r-md hover:bg-gray-200 transition-colors"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">Description</h3>
+                <p className="text-sm text-gray-600">{product.description || "No description available."}</p>
+              </div>
+
+              <div className="space-y-4">
+                {product.top_notes?.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-900 mb-2">Top Notes</h3>
+                    <div className="flex flex-wrap gap-2">{product.top_notes.map((n) => <span key={n.id} className="text-xs bg-gray-200 px-2 py-1 rounded">{n.name}</span>)}</div>
+                  </div>
+                )}
+                {product.heart_notes?.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-900 mb-2">Heart Notes</h3>
+                    <div className="flex flex-wrap gap-2">{product.heart_notes.map((n) => <span key={n.id} className="text-xs bg-gray-200 px-2 py-1 rounded">{n.name}</span>)}</div>
+                  </div>
+                )}
+                {product.base_notes?.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-900 mb-2">Base Notes</h3>
+                    <div className="flex flex-wrap gap-2">{product.base_notes.map((n) => <span key={n.id} className="text-xs bg-gray-200 px-2 py-1 rounded">{n.name}</span>)}</div>
+                  </div>
+                )}
               </div>
             </div>
-
-            {/* Gift Card Option */}
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="giftCard"
-                checked={hasGiftCard}
-                onChange={(e) => setHasGiftCard(e.target.checked)}
-                className="w-4 h-4"
-              />
-              <label htmlFor="giftCard" className="font-medium">
-                HAVE A GIFT CARD?
-              </label>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="space-y-3 ">
-              <button className="w-full border-1 border-gray-700 text-gray-700 py-3 px-6 font-semibold transition-all rounded-md hover:cursor-pointer">
-                ADD TO CART
-              </button>
-              <button className="w-full bg-black hover:cursor-pointer text-white py-3 px-6 transition-all rounded-md">
-                BUY NOW
-              </button>
-            </div>
           </div>
         </div>
-      </div>
 
-      {/* You May Also Like Section */}
-      <div className="bg-[#EFEFEF] px-4 lg:px-8 py-4">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xs text-gray-700">YOU MAY ALSO LIKE</h2>
-          <button  onClick={navigateToAllProducts}
-            className="text-xs bg-white font-medium text-gray-700 p-1 px-2 transition-colors duration-300 hover:cursor-pointer">
-          DISCOVER MORE
-        </button>
-        </div>
-        
-
-        <div onClick={navigateToProductDetails} className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-10 ">
-        {products.map((product) => (
-          <div key={product.id} className="group cursor-pointer">
-            <div className={" overflow-hidden mb-4 aspect-[4/5] relative"}>
-             <img src="src/assets/elf amor final logo.jpg" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-            </div>
-            {/* Product Info */}
-             <div className="space-y-1">
-              <h3 className="text-xs font-medium text-gray-900 tracking-wide">
-                {product.name}
-              </h3>
-              <p className="text-xs text-gray-600">
-                {product.price}
-              </p>
-            </div>
+        {/* Suggested */}
+        <div className="bg-[#EFEFEF] py-6 mt-8 rounded">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xs text-gray-700">YOU MAY ALSO LIKE</h2>
+            <button onClick={navigateToAllProducts} className="text-xs bg-white font-medium text-gray-700 p-1 px-2">DISCOVER MORE</button>
           </div>
-        ))}
-      </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-10">
+            {suggestedLoading ? (
+              // skeletons while loading
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-44 bg-gray-200 animate-pulse rounded" />
+              ))
+            ) : suggestedError ? (
+              <div className="col-span-2 lg:col-span-4 text-center text-red-600">
+                {suggestedError}
+              </div>
+            ) : suggestedProducts.length === 0 ? (
+              // fallback UI if none found
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="group cursor-pointer">
+                  <div className="overflow-hidden mb-4 aspect-[4/5] relative bg-white">
+                    <img src={FALLBACK_IMAGE} className="w-full h-full object-cover" alt={`also-${i}`} />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-xs font-medium text-gray-900 tracking-wide">PRODUCT NAME</h3>
+                    <p className="text-xs text-gray-600">RS. 3,995</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              // render suggested products fetched from backend
+              suggestedProducts.map((p) => (
+                <div key={p.id ?? p.pk ?? Math.random()} className="group cursor-pointer" onClick={() => {
+                  const pid = p.id ?? p.pk;
+                  if (pid) navigate(`/productdetails/${pid}`);
+                }}>
+                  <div className="overflow-hidden mb-4 aspect-[4/5] relative bg-white">
+                    <img src={p._image || FALLBACK_IMAGE} className="w-full h-full object-cover" alt={p.name || "product"} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMAGE; }} />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-xs font-medium text-gray-900 tracking-wide">{p.name || "Product"}</h3>
+                    <p className="text-xs text-gray-600">{p.price ?? p.price_display ?? ""}</p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
