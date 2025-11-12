@@ -23,6 +23,7 @@ const App = () => {
 
   return (
     <>
+    <ScrollToTop />
       {/* Navbar */}
       <Navbar currentPage={currentPage} setCurrentPage={setCurrentPage} />
 
