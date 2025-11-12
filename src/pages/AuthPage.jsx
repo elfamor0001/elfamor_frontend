@@ -195,7 +195,7 @@
 // export default AuthPage;
 
 import React, { useState, useEffect, useRef } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
 
 const API_BASE = "https://elfamor.pythonanywhere.com";

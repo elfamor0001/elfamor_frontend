@@ -1,21 +1,21 @@
 import React, { useState } from 'react';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
+import Navbar from './components/Navbar.jsx';
+import Footer from './components/Footer.jsx';
 import { Route, Routes } from 'react-router-dom';
-import AllProducts from './pages/AllProducts';
-import Home from './pages/Home';
-import ProductDetails from './pages/ProductDetails';
-import Cart from './pages/Cart';
-import RefundPolicy from './pages/RefundPolicy';
-import FAQs from './pages/Faqs';
-import AuthPage from './pages/AuthPage';
-import ContactUs from './pages/ContactUs';
-import Terms from './pages/Terms';
-import Shipping from './pages/Shipping';
-import AboutUs from './pages/AboutUs';
-import OrderHistoryPage from './pages/OrderHistoryPage';
-import OrderSuccessPage from './pages/OrderSuccessPage';
-import CheckoutPage from './pages/CheckoutPage';
+import AllProducts from './pages/AllProducts.jsx';
+import Home from './pages/Home.jsx';
+import ProductDetails from './pages/ProductDetails.jsx';
+import Cart from './pages/Cart.jsx';
+import RefundPolicy from './pages/RefundPolicy.jsx';
+import FAQs from './pages/Faqs.jsx';
+import AuthPage from './pages/AuthPage.jsx';
+import ContactUs from './pages/ContactUs.jsx';
+import Terms from './pages/Terms.jsx';
+import Shipping from './pages/Shipping.jsx';
+import AboutUs from './pages/AboutUs.jsx';
+import OrderHistoryPage from './pages/OrderHistoryPage.jsx';
+import OrderSuccessPage from './pages/OrderSuccessPage.jsx';
+import CheckoutPage from './pages/CheckoutPage.jsx';
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState('home');

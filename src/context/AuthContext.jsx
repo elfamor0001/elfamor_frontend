@@ -63,7 +63,7 @@
 
 
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
-import { getCSRFToken } from "./authUtils";
+import { getCSRFToken } from "./authUtils.js";
 
 const API_BASE = "https://elfamor.pythonanywhere.com";
 const AuthContext = createContext();

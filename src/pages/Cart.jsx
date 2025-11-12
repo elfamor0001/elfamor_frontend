@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCSRFToken } from '../context/authUtils';
+import { getCSRFToken } from '../context/authUtils.js';
 // If you use icons from lucide-react (or any other icon lib), import them:
 import { Minus, Plus, Trash2 } from 'lucide-react';
 

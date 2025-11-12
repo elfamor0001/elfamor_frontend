@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { loadRazorpay } from '../context/razorpayUtils';
-import { getCSRFToken } from '../context/authUtils';
-import { useAuth } from '../context/AuthContext';
+import { loadRazorpay } from '../context/razorpayUtils.js';
+import { getCSRFToken } from '../context/authUtils.js';
+import { useAuth } from '../context/AuthContext.jsx';
 
 const CheckoutPage = () => {
   const [cart, setCart] = useState(null);

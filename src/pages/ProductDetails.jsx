@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getCSRFToken } from '../context/authUtils';
+import { getCSRFToken } from '../context/authUtils.js';
 
 // prefer an imported fallback so bundlers (CRA/Vite) resolve it correctly
 import FALLBACK_IMG from "../assets/logo.png";

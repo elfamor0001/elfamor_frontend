@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Menu, X, ShoppingBag, Search } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logoImg from "../assets/logo.png";
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext.jsx';
 import { UserCircle } from 'lucide-react';  
 
 // Navbar Component
