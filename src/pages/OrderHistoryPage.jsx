@@ -40,7 +40,6 @@ const OrderHistoryPage = () => {
       'created': { color: 'bg-blue-100 text-blue-800', text: 'Created' },
       'attempted': { color: 'bg-yellow-100 text-yellow-800', text: 'Attempted' },
       'failed': { color: 'bg-red-100 text-red-800', text: 'Failed' },
-      'cancelled': { color: 'bg-gray-100 text-gray-800', text: 'Cancelled' },
     };
     
     const config = statusConfig[status] || statusConfig.created;
@@ -133,7 +132,6 @@ const OrderHistoryPage = () => {
                   { key: 'all', label: 'All Orders', count: orders.length },
                   { key: 'paid', label: 'Paid', count: orders.filter(o => o.status === 'paid').length },
                   { key: 'failed', label: 'Failed', count: orders.filter(o => o.status === 'failed').length },
-                  { key: 'cancelled', label: 'Cancelled', count: orders.filter(o => o.status === 'cancelled').length },
                 ].map((tab) => (
                   <button
                     key={tab.key}
@@ -258,14 +256,6 @@ const OrderHistoryPage = () => {
                       >
                         View Details
                       </Link>
-                      {order.status === 'created' && (
-                        <button
-                          onClick={() => handleCancelOrder(order.id)}
-                          className="inline-flex items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 transition-colors"
-                        >
-                          Cancel Order
-                        </button>
-                      )}
                       {order.status === 'paid' && (
                         <button
                           onClick={() => handleReorder(order)}
@@ -296,32 +286,6 @@ const OrderHistoryPage = () => {
       </div>
     </div>
   );
-};
-
-// Helper functions for actions
-const handleCancelOrder = async (orderId) => {
-  if (!window.confirm('Are you sure you want to cancel this order?')) return;
-  
-  try {
-    const response = await fetch(`https://elfamor.pythonanywhere.com/api/payments/orders/${orderId}/cancel/`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': await getCSRFToken(),
-      },
-    });
-    
-    if (response.ok) {
-      alert('Order cancelled successfully');
-      window.location.reload();
-    } else {
-      alert('Failed to cancel order');
-    }
-  } catch (error) {
-    console.error('Error cancelling order:', error);
-    alert('Error cancelling order');
-  }
 };
 
 const handleReorder = (order) => {
