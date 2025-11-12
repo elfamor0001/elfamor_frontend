@@ -17,6 +17,7 @@ import OrderHistoryPage from './pages/OrderHistoryPage.jsx';
 import OrderSuccessPage from './pages/OrderSuccessPage.jsx';
 import CheckoutPage from './pages/CheckoutPage.jsx';
 import OrderDetailPage from './pages/OrderDetailPage.jsx';
+import ScrollToTop from './components/ScrollToTop.js';
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState('home');
