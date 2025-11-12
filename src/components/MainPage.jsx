@@ -432,10 +432,11 @@ const MainPage = () => {
   });
 };
 
-  const handleProductClick = (product) => {
-    const id = product?.id ?? product?.pk;
-    navigate(id ? `/productdetails/${id}` : "/products");
-  };
+ const handleProductClick = (product) => {
+  const id = product?.id ?? product?.pk;
+  navigate(id ? `/productdetails/${id}` : "/products");
+  setTimeout(() => window.scrollTo(0, 0), 0);
+};
 
   return (
     <div className="relative">
