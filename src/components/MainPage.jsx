@@ -422,7 +422,10 @@ const MainPage = () => {
 }, []);
 
 
-  const navigateToAllProducts = () => navigate("/products");
+  const navigateToAllProducts = () => {
+  navigate("/products");
+  window.scrollTo(0, 0);
+};
 
   const handleProductClick = (product) => {
     const id = product?.id ?? product?.pk;
