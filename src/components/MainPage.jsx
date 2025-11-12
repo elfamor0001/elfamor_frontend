@@ -426,7 +426,7 @@ const MainPage = () => {
   navigate("/products");
   // Scroll to top of the page
   window.scrollTo({
-    top: 0,
+    top: -10,
     left: 0,
     behavior: 'smooth' // Optional: adds smooth scrolling
   });
