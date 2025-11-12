@@ -435,7 +435,7 @@ const MainPage = () => {
  const handleProductClick = (product) => {
   const id = product?.id ?? product?.pk;
   navigate(id ? `/productdetails/${id}` : "/products");
-  setTimeout(() => window.scrollTo(0, 0), 0);
+  setTimeout(() => window.scrollTo(-10, -10), 0);
 };
 
   return (
