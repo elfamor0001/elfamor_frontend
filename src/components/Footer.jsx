@@ -81,12 +81,6 @@ export const Footer = () =>{
       >
         TERMS
       </a>
-      <a 
-        href="/faqs" 
-        className="text-xs text-gray-700 hover:text-gray-900 transition-colors duration-300 cursor-pointer"
-      >
-        FAQS
-      </a>
     </div>
   </div>
 </footer>
