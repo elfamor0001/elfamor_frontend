@@ -226,7 +226,7 @@ const MenuBar = ({ productCount = 0 }) => {
               FILTER:
               <select className="text-gray-700 hover:cursor-pointer" value={size} onChange={e => setSize(e.target.value)}>
                 <option className=" hover:cursor-pointer" value="All">Size</option>
-                <option className=" hover:cursor-pointer" value="S">100 ml</option>
+                <option className=" hover:cursor-pointer" value="S">50 ml</option>
               </select>
             </label>
             <label>
@@ -290,8 +290,7 @@ const MenuBar = ({ productCount = 0 }) => {
                 onChange={e => setTempSize(e.target.value)}
               >
                 <option value="All">All Sizes</option>
-                <option value="S">100 ml</option>
-                <option value="S">200 ml</option>
+                <option value="S">50 ml</option>
               </select>
             </div>
 

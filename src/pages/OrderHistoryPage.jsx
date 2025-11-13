@@ -129,7 +129,7 @@ const OrderHistoryPage = () => {
             <div className="border-b border-gray-200">
               <nav className="flex -mb-px">
                 {[
-                  { key: 'all', label: 'All Orders', count: orders.length },
+                  { key: 'all', label: 'All ', count: orders.length },
                   { key: 'paid', label: 'Paid', count: orders.filter(o => o.status === 'paid').length },
                   { key: 'failed', label: 'Failed', count: orders.filter(o => o.status === 'failed').length },
                 ].map((tab) => (
@@ -190,7 +190,7 @@ const OrderHistoryPage = () => {
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <div className="flex items-center space-x-4 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900">
+                        <h3 className="text-md font-semibold text-gray-900">
                           Order #{order.razorpay_order_id}
                         </h3>
                         {getStatusBadge(order.status)}
@@ -200,7 +200,7 @@ const OrderHistoryPage = () => {
                       </p>
                     </div>
                     <div className="mt-2 sm:mt-0 text-right">
-                      <p className="text-2xl font-bold text-gray-900">
+                      <p className="text-mb font-semibold text-gray-900">
                         {formatAmount(order.amount)}
                       </p>
                       <p className="text-sm text-gray-500">
@@ -211,7 +211,7 @@ const OrderHistoryPage = () => {
                 </div>
 
                 {/* Order Items */}
-                <div className="p-6">
+                <div className="p-4">
                   <div className="space-y-4">
                     {order.items?.map((item) => (
                       <div key={item.id} className="flex items-center space-x-4">
@@ -277,7 +277,7 @@ const OrderHistoryPage = () => {
           <div className="mt-8 text-center">
             <button
               onClick={fetchOrders}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors mb-2"
             >
               Refresh Orders
             </button>

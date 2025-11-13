@@ -434,8 +434,7 @@ const AllProducts = () => {
                 onChange={e => setSize(e.target.value)}
               >
                 <option value="All">All Sizes</option>
-                <option value="100 ml">100 ml</option>
-                <option value="200 ml">200 ml</option>
+                <option value="100 ml">50 ml</option>
               </select>
             </label>
             <label className="text-gray-700 text-xs flex items-center gap-2">
@@ -500,8 +499,7 @@ const AllProducts = () => {
                   onChange={e => setTempSize(e.target.value)}
                 >
                   <option value="All">All Sizes</option>
-                  <option value="100 ml">100 ml</option>
-                  <option value="200 ml">200 ml</option>
+                  <option value="100 ml">50 ml</option>
                 </select>
               </div>
 

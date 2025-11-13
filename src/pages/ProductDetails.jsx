@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { getCSRFToken } from '../context/authUtils.js';
+import { useAuth } from "../context/AuthContext.jsx";
 
 // prefer an imported fallback so bundlers (CRA/Vite) resolve it correctly
 import FALLBACK_IMG from "../assets/logo.png";
@@ -34,6 +35,8 @@ const ProductDetails = () => {
   const [suggestedProducts, setSuggestedProducts] = useState([]);
   const [suggestedLoading, setSuggestedLoading] = useState(true);
   const [suggestedError, setSuggestedError] = useState("");
+  const location = useLocation();
+  const { user } = useAuth();
 
   const prevQtyRef = useRef(0);
 
@@ -247,42 +250,43 @@ const ProductDetails = () => {
 
   // Enhanced Add to Cart functionality from first code
  const handleAddToCart = () => {
-    // Add to cart logic: POST to backend cart endpoint
-    (async () => {
-      try {
-        const csrfToken = await getCSRFToken();
-        const res = await fetch('https://elfamor.pythonanywhere.com/api/cart/add/', {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken,
-          },
-          body: JSON.stringify({ product_id: product.id, quantity }),
-        });
+   // if user not logged in, redirect to auth and preserve current location
+   if (!user) {
+     navigate('/auth', { state: { from: location } });
+     return;
+   }
 
-        if (res.ok) {
-          const data = await res.json();
-          // Simple feedback: console and navigate to cart if desired
-          console.log('Added to cart', data);
-          // Optionally navigate to cart or show a toast
-          // navigate('/cart');
-          alert(`Added ${quantity} x ${product.name} to cart`);
-        } else if (res.status === 401) {
-          // Not authenticated
-          alert('Please log in to add items to your cart');
-          navigate('/auth');
-        } else {
-          const err = await res.json().catch(() => null);
-          console.error('Failed to add to cart', err);
-          alert((err && err.error) || 'Failed to add item to cart');
-        }
-      } catch (err) {
-        console.error('Add to cart error', err);
-        alert('Could not add item to cart — check console for details');
-      }
-    })();
-  };
+   // Add to cart logic: POST to backend cart endpoint
+   (async () => {
+     try {
+       const csrfToken = await getCSRFToken();
+       const res = await fetch('https://elfamor.pythonanywhere.com/api/cart/add/', {
+        method: 'POST',
+        credentials: 'include',
+         headers: {
+           'Content-Type': 'application/json',
+           'X-CSRFToken': csrfToken,
+         },
+         body: JSON.stringify({ product_id: product.id, quantity }),
+       });
+       if (res.ok) {
+         const data = await res.json();
+         console.log('Added to cart', data);
+         alert(`Added ${quantity} x ${product.name} to cart`);
+       } else if (res.status === 401) {
+         // backend says unauthenticated — redirect
+         navigate('/auth', { state: { from: location } });
+       } else {
+         const err = await res.json().catch(() => null);
+         console.error('Failed to add to cart', err);
+         alert((err && err.error) || 'Failed to add item to cart');
+       }
+     } catch (err) {
+       console.error('Add to cart error', err);
+       alert('Could not add item to cart — check console for details');
+     }
+   })();
+ };
 
   const navigateToAllProducts = () => navigate("/products");
 

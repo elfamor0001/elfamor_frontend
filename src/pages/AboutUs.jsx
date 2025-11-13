@@ -1,16 +1,17 @@
 import React from 'react';
+import logoImg from "../assets/logo.png";
 
 const AboutUs = () => {
   return (
     <div className="min-h-screen bg-white">
       <div className="container mx-auto px-4 py-8 lg:py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-12 items-start">
           
           {/* Left side - Image */}
           <div className="relative w-full">
-            <div className="aspect-[3/4] w-full overflow-hidden rounded-lg">
+            <div className="w-full overflow-hidden rounded-lg">
               <img
-                src="/logo.png"
+                src={logoImg}
                 alt="Elf Amor Perfume"
                 className="w-full h-full object-cover"
               />
@@ -18,7 +19,7 @@ const AboutUs = () => {
           </div>
 
           {/* Right side - Content */}
-          <div className="space-y-8 lg:pt-8">
+          <div className="space-y-8 lg:pt-20">
             {/* Section 1 */}
             <div>
               <h2 className="text-sm font-semibold tracking-wider text-gray-700 mb-6">

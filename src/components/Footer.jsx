@@ -50,7 +50,7 @@ export const Footer = () =>{
     </div>
 
     {/* Links Section */}
-    <div className="flex flex-col sm:grid sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-2 sm:gap-3 lg:gap-2 xl:gap-6">
+    <div className="flex items-center justify-center flex-col sm:grid sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-2 gap-2 sm:gap-3 md:gap-2 xl:gap-6">
       <a 
         href="/refund-policy" 
         className="text-xs text-gray-700 hover:text-gray-900 transition-colors duration-300 cursor-pointer"

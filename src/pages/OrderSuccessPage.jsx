@@ -170,7 +170,7 @@ const OrderSuccessPage = () => {
               </div>
 
               {/* Order Items */}
-              <div className="bg-gray-50 rounded-lg p-6">
+              <div className="bg-gray-50 rounded-lg p-2">
                 <h2 className="text-lg font-semibold mb-4">Order Items</h2>
                 <div className="space-y-4">
                   {order.items && order.items.map((item) => (

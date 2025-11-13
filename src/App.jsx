@@ -18,13 +18,14 @@ import OrderSuccessPage from './pages/OrderSuccessPage.jsx';
 import CheckoutPage from './pages/CheckoutPage.jsx';
 import OrderDetailPage from './pages/OrderDetailPage.jsx';
 import ScrollToTop from './components/ScrollToTop.js';
+import ProtectedRoute from './components/ProtectedRoute.jsx';
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState('home');
 
   return (
     <>
-    <ScrollToTop />
+      <ScrollToTop />
       {/* Navbar */}
       <Navbar currentPage={currentPage} setCurrentPage={setCurrentPage} />
 
@@ -32,24 +33,46 @@ const App = () => {
         <Route path='/' element={<Home/>} />
         <Route path='/products' element={<AllProducts/>} />
         <Route path='/productdetails/:id' element={<ProductDetails/>} />
-        <Route path='/cart' element={<Cart/>} />
+        
+        {/* Protected Routes */}
+        <Route path='/cart' element={
+          <ProtectedRoute>
+            <Cart />
+          </ProtectedRoute>
+        }/>
+        <Route path='/orders' element={
+          // <ProtectedRoute>
+            <OrderHistoryPage />
+          // </ProtectedRoute>
+        }/>
+        <Route path='/checkout' element={
+          <ProtectedRoute>
+            <CheckoutPage />
+          </ProtectedRoute>
+        }/>
+        <Route path='/orders/:orderId' element={
+          <ProtectedRoute>
+            <OrderDetailPage />
+          </ProtectedRoute>
+        }/>
+        <Route path='/order-success' element={
+          <ProtectedRoute>
+            <OrderSuccessPage />
+          </ProtectedRoute>
+        }/>
+        
+        {/* Public Routes */}
         <Route path='/refund-policy' element={<RefundPolicy/>} />
-        <Route path='/faqs' element={<FAQs/>} />
+        {/* <Route path='/faqs' element={<FAQs/>} /> */}
         <Route path='/auth' element={<AuthPage/>} />
         <Route path='/contact-us' element={<ContactUs/>} />
-        <Route path='/orders' element={<OrderHistoryPage/>} />
         <Route path='/terms' element={<Terms/>} />
         <Route path='/shipping' element={<Shipping/>} />
         <Route path='/about' element={<AboutUs/>} />
-        <Route path='/order-success' element={<OrderSuccessPage/>} />
-        <Route path='/checkout' element={<CheckoutPage/>} />
-        <Route path='/orders/:orderId' element={<OrderDetailPage/>} />
       </Routes>
       
       {/* Footer */}
       <Footer />
-
-      
     </>
   );
 };
