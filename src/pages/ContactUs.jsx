@@ -63,17 +63,16 @@ export default function ContactUs() {
   return (
     <div className="min-h-screen bg-[#efefef] py-14 px-2 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 md:px-18">
           <h2 className="text-gray-600 text-sm font-semibold tracking-wider uppercase mb-6">
             CONNECT WITH THE BRAND
           </h2>
           <p className="text-gray-700 text-xs sm:text-sm leading-relaxed mb-4">
             WE WOULD LOVE TO HEAR ABOUT YOUR FEEDBACK, INTERESTS AND FUTURE COLLABORATIONS. REACH OUT TO US ON EMAIL AT{' '}
             <a href="mailto:CONTACT@ELFAMOR001@GMAIL.COM" className="text-gray-900 hover:underline">
-              CONTACT@ELFAMOR001@GMAIL.COM
+              @ELFAMOR0001@GMAIL.COM
             </a>
-            . OUR DEDICATED CUSTOMER SUPPORT NUMBER CAN BE REACHED ON{' '}
-            <span className="text-gray-900">8448441398</span>, MONDAY TO SATURDAY, 11.30 AM TO 8:00 PM.
+            . MONDAY TO SATURDAY, 11.30 AM TO 8:00 PM.
           </p>
           <p className="text-gray-600 text-xs font-medium tracking-wide">
             ELFAMOR
