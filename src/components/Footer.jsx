@@ -15,21 +15,21 @@ export const Footer = () =>{
         {/* Top Banner */}
       <div className="bg-[#1c1c1c] text-gray-200 p-3 text-center text-xs font-medium tracking-wider w-full overflow-hidden relative">
       <div className="flex animate-marquee whitespace-nowrap">
-        <span className="mx-12">SHIPPING WORLDWIDE</span>
-        <span className="mx-12">SHIPPING WORLDWIDE</span>
-        <span className="mx-12">SHIPPING WORLDWIDE</span>
-        <span className="mx-12">SHIPPING WORLDWIDE</span>
-        <span className="mx-12">SHIPPING WORLDWIDE</span>
-        <span className="mx-12">SHIPPING WORLDWIDE</span>
-        <span className="mx-12">SHIPPING WORLDWIDE</span>
-        <span className="mx-12">SHIPPING WORLDWIDE</span>
-        <span className="mx-12">SHIPPING WORLDWIDE</span>
-        <span className="mx-12">SHIPPING WORLDWIDE</span>
-        <span className="mx-12">SHIPPING WORLDWIDE</span>
-        <span className="mx-12">SHIPPING WORLDWIDE</span>
-        <span className="mx-12">SHIPPING WORLDWIDE</span>
-        <span className="mx-12">SHIPPING WORLDWIDE</span>
-        <span className="mx-12">SHIPPING WORLDWIDE</span>
+        <span className="mx-12">SHIPPING NATIONWIDE</span>
+        <span className="mx-12">SHIPPING NATIONWIDE</span>
+        <span className="mx-12">SHIPPING NATIONWIDE</span>
+        <span className="mx-12">SHIPPING NATIONWIDE</span>
+        <span className="mx-12">SHIPPING NATIONWIDE</span>
+        <span className="mx-12">SHIPPING NATIONWIDE</span>
+        <span className="mx-12">SHIPPING NATIONWIDE</span>
+        <span className="mx-12">SHIPPING NATIONWIDE</span>
+        <span className="mx-12">SHIPPING NATIONWIDE</span>
+        <span className="mx-12">SHIPPING NATIONWIDE</span>
+        <span className="mx-12">SHIPPING NATIONWIDE</span>
+        <span className="mx-12">SHIPPING NATIONWIDE</span>
+        <span className="mx-12">SHIPPING NATIONWIDE</span>
+        <span className="mx-12">SHIPPING NATIONWIDE</span>
+        <span className="mx-12">SHIPPING NATIONWIDE</span>
       </div>
       </div>
       <footer className="bg-[#EFEFEF] mb-0 lg:pt-15 lg:px-30">
@@ -79,8 +79,7 @@ export const Footer = () =>{
         href="/terms" 
         className="text-xs text-gray-700 hover:text-gray-900 transition-colors duration-300 cursor-pointer"
       >
-        TERMS
-      </a>
+        TERMNATION</a>
     </div>
   </div>
 </footer>

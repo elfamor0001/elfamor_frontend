@@ -7,7 +7,13 @@ export default function RefundPolicy() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-lg font-semibold text-gray-800">Refund &amp; Return Policy</h1>
-          <p className="text-xs text-gray-600 mt-2">Last updated: November 12, 2025</p>
+          <p className="text-xs text-gray-600 mt-2">
+  Last updated: {new Date().toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  })}
+</p>
         </div>
 
         {/* Policy Body */}

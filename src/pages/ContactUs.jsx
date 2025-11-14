@@ -70,7 +70,7 @@ export default function ContactUs() {
           <p className="text-gray-700 text-xs sm:text-sm leading-relaxed mb-4">
             WE WOULD LOVE TO HEAR ABOUT YOUR FEEDBACK, INTERESTS AND FUTURE COLLABORATIONS. REACH OUT TO US ON EMAIL AT{' '}
             <a href="mailto:CONTACT@ELFAMOR001@GMAIL.COM" className="text-gray-900 hover:underline">
-              @ELFAMOR0001@GMAIL.COM
+              ELFAMOR0001@GMAIL.COM
             </a>
             . MONDAY TO SATURDAY, 11.30 AM TO 8:00 PM.
           </p>

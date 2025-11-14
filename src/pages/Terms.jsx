@@ -7,7 +7,13 @@ export default function Terms() {
       <div className="mx-auto max-w-4xl">
         <div className="text-center mb-8">
           <h1 className="text-lg font-semibold text-gray-800">Terms &amp; Conditions</h1>
-          <p className="text-xs text-gray-600 mt-2">Last updated: November 12, 2025</p>
+          <p className="text-xs text-gray-600 mt-2">
+  Last updated: {new Date().toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  })}
+</p>
         </div>
 
         <div className="bg-white p-6 rounded shadow-sm">
@@ -169,7 +175,7 @@ export default function Terms() {
           <section className="mb-2">
             <h2 className="font-semibold text-sm text-gray-800 mb-2">16. Contact Us</h2>
             <p className="text-xs text-gray-700 leading-7">
-              If you have any questions regarding these Terms, please contact us by visiting our contact page: 
+              If you have any questions regarding these Terms, please contact us by visiting our contact page:{" "}
               <Link to="/contact-us" className="underline text-xs">Contact Us</Link> or visit <a href="https://www.elfamor.com/contact-us" target="_blank" rel="noreferrer" className="underline text-xs">https://www.elfamor.com/contact-us</a>.
             </p>
           </section>
