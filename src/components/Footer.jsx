@@ -55,7 +55,7 @@ export const Footer = () =>{
         href="/refund-policy" 
         className="text-xs text-gray-700 hover:text-gray-900 transition-colors duration-300 cursor-pointer"
       >
-        RETURNS POLICY
+        RETURN POLICY
       </a>
       <a 
         href="/about" 
@@ -79,7 +79,7 @@ export const Footer = () =>{
         href="/terms" 
         className="text-xs text-gray-700 hover:text-gray-900 transition-colors duration-300 cursor-pointer"
       >
-        TERMNATION</a>
+        TERMS</a>
     </div>
   </div>
 </footer>
