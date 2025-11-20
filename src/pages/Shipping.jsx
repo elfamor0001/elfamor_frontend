@@ -1,66 +1,54 @@
 import { Link } from "react-router-dom";
 
-const policyParagraphs = [
-  `BY AGREEING TO USE THE ELFA MOR EXCHANGES PORTAL AND/OR INITIATING A REQUEST FOR PURCHASE OF PRODUCT(S) ON THE PORTAL, YOU AGREE TO BE BOUND BY THE TERMS CONTAINED IN THIS POLICY WITHOUT MODIFICATION. IF YOU DO NOT AGREE TO THE TERMS CONTAINED IN THIS POLICY, YOU ARE ADVISED NOT TO TRANSACT ON ELFAMOR.COM.`,
-  `PLEASE NOTE THAT WE MAY FROM TIME TO TIME CHANGE THE TERMS OF THE POLICY THAT GOVERN YOUR RETURN, REFUND OR CANCELLATION OF AN ORDER FOR PRODUCTS ON ELFAMOR.COM. EVERY TIME YOU WISH TO USE THE PORTAL, PLEASE CHECK THE POLICY TO ENSURE YOU UNDERSTAND THE TERMS AND CONDITIONS THAT APPLY AT THAT TIME.`,
-];
+const shippingText = [
+  `Purchases are shipped from our warehouse in Faridabad, Haryana – India, by courier. Please allow following number of days from receipt of your order.`,
 
-const numberedPoints = [
-  "WE OFFER EXCHANGES & RETURNS WITHIN 7 DAYS FROM THE DATE OF DELIVERY. ONCE YOUR EXCHANGE/RETURN QUERY HAS BEEN ACCEPTED BY OUR TEAM, A NOTIFICATION WILL BE SENT TO YOUR REGISTERED EMAIL AND YOUR ORDER WILL BE PICKED UP BY OUR LOGISTICS PARTNER WITHIN 24-48 HOURS.",
-  "PICK-UP WILL BE ATTEMPTED TWICE. IF THE COURIER PARTNER IS UNABLE TO PICK UP THE SHIPMENT, YOU WILL HAVE TO SEND THE SHIPMENT BACK TO THE WAREHOUSE ADDRESS. REVERSE PICK-UP IS SUBJECT TO THE AVAILABILITY OF THE SERVICE IN YOUR AREA PINCODE.",
-  "PLEASE NOTE THAT ONCE YOUR ORDER HAS BEEN RECEIVED AT THE WAREHOUSE, IT WILL GO THROUGH A QUALITY CHECK AND ONCE APPROVED, YOUR EXCHANGE/RETURN QUERY WILL BE PROCESSED FURTHER.",
-  "ESTIMATED DELIVERY OF ALL EXCHANGE QUERIES FALL BETWEEN 7-10 WORKING DAYS.",
-  "IF AN EXCHANGE IN SIZE CANNOT BE FULFILLED DUE TO AVAILABILITY OF STOCK, WE WILL MAKE SURE TO HAVE THIS EXCHANGED FOR ANOTHER PRODUCT OR YOU WILL BE ISSUED A GIFT CARD WHICH CAN BE AVAILED AT EITHER OF OUR STORES OR ON YOUR NEXT ONLINE PURCHASE.",
-  "FOR ALL RETURN ORDERS, REFUNDS WILL BE ISSUED IN THE FORM OF A CREDIT NOTE ONCE QC ON THE PRODUCT HAS BEEN APPROVED. THIS WILL BE SHARED ON YOUR REGISTERED EMAIL ADDRESS.",
-  "PLEASE RETURN YOUR PRODUCT(S) IN THE SAME CONDITION AS IT WAS SHIPPED. IF THE PRODUCTS ARE RETURNED IN POOR CONDITION OR HAVE CLEARLY BEEN WORN, WE WON'T PROCEED FORWARD WITH THE QUERY.",
-  "IF ISSUES STILL PERSIST, KINDLY DROP US AN EMAIL WITH YOUR NAME AND ORDER ID ON ORDERSUPPORT@ELFAMOR.COM. WE ARE AVAILABLE MONDAY-SATURDAY BETWEEN 11:00 AM - 7:00 PM. ALL PENDING QUERIES WILL BE SOLVED ON PRIORITY WITHIN 24 HOURS.",
-  "CANCELLATION OF ORDERS ARE ONLY PERMITTED ON COD ORDERS WHICH WILL BE POSSIBLE IF AND TILL THE ORDER HAS NOT BEEN DISPATCHED FROM OUR WAREHOUSE.",
-  "ALL PREPAID ORDERS ARE FINAL. WE DO NOT OFFER ANY CANCELLATIONS AND REFUNDS. ANY REFUNDS ARE ISSUED IN THE FORM OF GIFT CARDS EQUIVALENT TO THE SELLING/MRP AMOUNT, WHICH CAN BE USED WITHIN 6 (SIX) MONTHS. GIFT CARDS ARE NON-REFUNDABLE; AND ARE ONLY REDEEMABLE AT OUR OFFLINE AND ONLINE STORE. SHIPPING CHARGES ARE NON-REFUNDABLE.",
-  "NOTE: WE OFFER A 30-DAY REVIEW PERIOD FOR GARMENT ISSUES LIKE COLOUR BLEEDING, PRINT CRACKS OR FINISHING FLAWS. IF REPORTED WITHIN 30 DAYS OF PURCHASE, WE'LL ARRANGE A PICKUP AND RESOLVE IT. REQUESTS AFTER 30 DAYS WON'T BE ELIGIBLE FOR REPLACEMENTS OR REFUNDS.",
+  `India Wide – 3 to 7 business days`,
+
+  `Order deliveries will be made between 9am – 8pm Monday – Saturday. Goods will need to be signed for upon delivery. If you cannot be there to sign for your delivery please suggest an alternative i.e. a family member, colleague, neighbor, etc.`,
+
+  `Elf Amor takes no responsibility for goods signed by an alternative person.`,
+
+  `Elf Amor is not responsible for damage after delivery.`,
+
+  `All claims for shortages or damages must be reported to customer service on the day of delivery along with the video evidencing the opening the shipment until the product is found damaged/ defective/incorrect. Shipping and handling rates may vary based on product, packaging, size, volume, type and other considerations. The shipping and handling charges are given at the time of check out and consumers will know about this before making payments.`,
 ];
 
 export default function Shipping() {
   return (
     <div className="min-h-screen bg-[#efefef] text-[#111827] py-15 px-4 sm:px-6 lg:px-24 mt-12">
       <div className="mx-auto">
+        
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-sm tracking-widest text-gray-600">REFUND &amp; EXCHANGE POLICY</h1>
+          <h1 className="text-sm tracking-widest text-gray-600">SHIPPING POLICY</h1>
+          <p className="text-xs text-gray-600 mt-2">
+  Last updated: {new Date().toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  })}
+</p>
         </div>
 
-        {/* Body container with subtle bg like screenshot */}
+        {/* Body */}
         <div className="">
-          {/* Intro */}
-          <div className="mb-6">
-            <h2 className="font-semibold text-gray-800 mb-3">APPLICABILITY OF POLICY</h2>
-            {policyParagraphs.map((p, i) => (
-              <p key={i} className="text-xs sm:text-sm text-gray-700 leading-6 mb-3">
+          <div className="mb-6 space-y-4">
+            {shippingText.map((p, i) => (
+              <p key={i} className="text-xs sm:text-sm text-gray-700 leading-6">
                 {p}
               </p>
             ))}
-            <p className="text-xs sm:text-sm italic font-semibold mt-2">
-              <Link to="/returns" className="underline">TO PLACE RETURN/EXCHANGE REQUEST, CLICK HERE.</Link>
-            </p>
           </div>
 
-          {/* Numbered points */}
-          <div className="mt-6">
-            <ol className="list-decimal list-inside space-y-4 text-xs sm:text-sm text-gray-700">
-              {numberedPoints.map((pt, idx) => (
-                <li key={idx} className="leading-6">
-                  {pt}
-                </li>
-              ))}
-            </ol>
-          </div>
-
-          {/* Footer note / highlight */}
+          {/* Footer note */}
           <div className="mt-6 border-t pt-4">
             <p className="text-xs sm:text-sm text-gray-700">
-              <strong>IMPORTANT:</strong> Policy terms are subject to change. Always check the latest policy on the site before initiating any return/exchange.
+              <strong>IMPORTANT:</strong> Shipping terms are subject to change. Always check the latest policy on the website.
             </p>
           </div>
         </div>
+
       </div>
     </div>
   );

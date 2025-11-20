@@ -6,7 +6,7 @@ export default function RefundPolicy() {
       <div className="mx-auto max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-lg font-semibold text-gray-800">Refund &amp; Return Policy</h1>
+          <h1 className="text-sm tracking-widest text-gray-600">REFUND &amp; RETURN POLICY</h1>
           <p className="text-xs text-gray-600 mt-2">
   Last updated: {new Date().toLocaleDateString("en-GB", {
     day: "numeric",
@@ -17,7 +17,7 @@ export default function RefundPolicy() {
         </div>
 
         {/* Policy Body */}
-        <div className="bg-white p-6 rounded shadow-sm space-y-6">
+        <div className="bg-[#efefef] mt-10 space-y-6">
           <section>
             <h2 className="font-semibold text-sm text-gray-800 mb-2">1. Scope</h2>
             <p className="text-xs text-gray-700 leading-6">

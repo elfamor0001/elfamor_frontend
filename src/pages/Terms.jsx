@@ -6,7 +6,7 @@ export default function Terms() {
     <div className="min-h-screen bg-[#efefef] text-[#111827] py-12 px-4 sm:px-6 lg:px-24 mt-12">
       <div className="mx-auto max-w-4xl">
         <div className="text-center mb-8">
-          <h1 className="text-lg font-semibold text-gray-800">Terms &amp; Conditions</h1>
+          <h1 className="text-SM tracking-widest text-gray-600">TERMS &amp; CONDITIONS</h1>
           <p className="text-xs text-gray-600 mt-2">
   Last updated: {new Date().toLocaleDateString("en-GB", {
     day: "numeric",
@@ -16,7 +16,7 @@ export default function Terms() {
 </p>
         </div>
 
-        <div className="bg-white p-6 rounded shadow-sm">
+        <div className="bg-[#efefef] mt-10">
           <p className="text-xs text-gray-700 leading-7 mb-4">
             Welcome to <strong>Elf Amor</strong> ("we", "our", "us"). These Terms and Conditions ("Terms") govern your
             access to and use of our website — <span className="font-medium">www.elfamor.com</span> (the "Site") — and the
