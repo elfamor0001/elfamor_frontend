@@ -6,7 +6,7 @@ export default function Terms() {
     <div className="min-h-screen bg-[#efefef] text-[#111827] py-12 px-4 sm:px-6 lg:px-24 mt-12">
       <div className="mx-auto max-w-4xl">
         <div className="text-center mb-8">
-          <h1 className="text-SM tracking-widest text-gray-600">TERMS &amp; CONDITIONS</h1>
+          <h1 className="text-sm tracking-widest text-gray-600">TERMS &amp; CONDITIONS</h1>
           <p className="text-xs text-gray-600 mt-2">
   Last updated: {new Date().toLocaleDateString("en-GB", {
     day: "numeric",

@@ -32,7 +32,7 @@ export const Footer = () =>{
         <span className="mx-12">SHIPPING NATIONWIDE</span>
       </div>
       </div>
-      <footer className="bg-[#EFEFEF] mb-0 lg:pt-15 lg:px-30">
+      <footer className="bg-[#EFEFEF] mb-0 lg:px-30 xl:px-70">
   <div className="max-w-full overflow-hidden relative p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12 2xl:p-16 flex flex-col lg:flex-row lg:justify-between items-center gap-6 lg:gap-8">
     
     {/* Logo and Creator Section */}
@@ -70,7 +70,7 @@ export const Footer = () =>{
         CONTACT US
       </a>
       <a 
-        href="/shipping" 
+        href="/shipping-policy" 
         className="text-xs text-gray-700 hover:text-gray-900 transition-colors duration-300 cursor-pointer"
       >
         SHIPPING POLICY
@@ -80,13 +80,17 @@ export const Footer = () =>{
         className="text-xs text-gray-700 hover:text-gray-900 transition-colors duration-300 cursor-pointer"
       >
         TERMS</a>
+      <a 
+        href="/privacy-policy" 
+        className="text-xs text-gray-700 hover:text-gray-900 transition-colors duration-300 cursor-pointer"
+      >
+        PRIVACY POLICY</a>
     </div>
   </div>
 </footer>
       <div className="flex items-center justify-around bg-[#1c1c1c] text-gray-200 p-3 text-center text-xs font-medium tracking-wider w-full ">
         <h1>Connect</h1>
         <a href="https://www.instagram.com/_elfamor_/"><h1>Instagram</h1></a>
-        <h1>Youtube</h1>
       </div>
       </>
       );

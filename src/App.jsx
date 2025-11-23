@@ -19,6 +19,7 @@ import CheckoutPage from './pages/CheckoutPage.jsx';
 import OrderDetailPage from './pages/OrderDetailPage.jsx';
 import ScrollToTop from './components/ScrollToTop.js';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+import PrivacyPolicy from './pages/PrivacyPolicy.jsx';
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState('home');
@@ -67,8 +68,9 @@ const App = () => {
         <Route path='/auth' element={<AuthPage/>} />
         <Route path='/contact-us' element={<ContactUs/>} />
         <Route path='/terms' element={<Terms/>} />
-        <Route path='/shipping' element={<Shipping/>} />
+        <Route path='/shipping-policy' element={<Shipping/>} />
         <Route path='/about' element={<AboutUs/>} />
+        <Route path='/privacy-policy' element={<PrivacyPolicy/>} />
       </Routes>
       
       {/* Footer */}
