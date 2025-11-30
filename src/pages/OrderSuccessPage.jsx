@@ -196,11 +196,11 @@ const OrderSuccessPage = () => {
                   <div className="border-t pt-4 space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Subtotal</span>
-                      <span>₹{order.amount}</span>
+                      <span>₹{order.subtotal}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Shipping</span>
-                      <span className="text-green-600">FREE</span>
+                      <span className="text-green-600">{order.shipment_charge}</span>
                     </div>
                     <div className="flex justify-between text-lg font-semibold border-t pt-2">
                       <span>Total</span>

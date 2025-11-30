@@ -71,6 +71,7 @@ const App = () => {
         <Route path='/shipping-policy' element={<Shipping/>} />
         <Route path='/about' element={<AboutUs/>} />
         <Route path='/privacy-policy' element={<PrivacyPolicy/>} />
+        <Route path='/checkout' element={<CheckoutPage/>} />
       </Routes>
       
       {/* Footer */}

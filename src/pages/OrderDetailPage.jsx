@@ -168,11 +168,11 @@ const OrderDetailPage = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subtotal</span>
-                    <span>{formatAmount(order.amount)}</span>
+                    <span>{formatAmount(order.subtotal)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Shipping</span>
-                    <span className="text-green-600">FREE</span>
+                    <span className="text-green-600">{order.shipment_charge}</span>
                   </div>
                   <div className="flex justify-between text-lg font-semibold border-t pt-3">
                     <span>Total</span>
