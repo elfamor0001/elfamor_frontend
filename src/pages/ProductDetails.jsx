@@ -623,6 +623,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { getCSRFToken } from '../context/authUtils.js';
 import { useAuth } from "../context/AuthContext.jsx";
+import { toast } from "react-hot-toast";
 
 // prefer an imported fallback so bundlers (CRA/Vite) resolve it correctly
 import FALLBACK_IMG from "../assets/logo.png";
@@ -880,52 +881,56 @@ const discountPercentage =
 
   // Enhanced Add to Cart functionality from first code
   const handleAddToCart = () => {
-    // Check if product is out of stock
-    if (isOutOfStock) {
-      alert("This product is currently out of stock");
-      return;
-    }
+  if (isOutOfStock) {
+    toast.error("This product is currently out of stock");
+    return;
+  }
 
-    // if user not logged in, redirect to auth and preserve current location
-    if (!user) {
-      navigate('/auth', { state: { from: location } });
-      return;
-    }
+  // Redirect if not logged in
+  if (!user) {
+    navigate('/auth', { state: { from: location } });
+    return;
+  }
 
-    // Add to cart logic: POST to backend cart endpoint
-    (async () => {
-      try {
-        setItemActionLoading(true);
-        const csrfToken = await getCSRFToken();
-        const res = await fetch('https://elfamor.pythonanywhere.com/api/cart/add/', {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken,
-          },
-          body: JSON.stringify({ product_id: product.id, quantity }),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          console.log('Added to cart', data);
-          alert(`Added ${quantity} x ${product.name} to cart`);
-        } else if (res.status === 401) {
-          // backend says unauthenticated — redirect
-          navigate('/auth', { state: { from: location } });
-        } else {
-          const err = await res.json().catch(() => null);
-          console.error('Failed to add to cart', err);
-          alert((err && err.error) || 'Failed to add item to cart');
-        }
-      } catch (err) {
-        console.error('Add to cart error', err);
-        alert('Could not add item to cart — check console for details');
-      } finally {
-        setItemActionLoading(false);
+  (async () => {
+    try {
+      setItemActionLoading(true);
+      const csrfToken = await getCSRFToken();
+
+      const res = await fetch('https://elfamor.pythonanywhere.com/api/cart/add/', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken,
+        },
+        body: JSON.stringify({ product_id: product.id, quantity }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        console.log("Added to cart", data);
+
+        toast.success(`Added ${quantity} x ${product.name} to cart`);
+      } 
+      else if (res.status === 401) {
+        navigate('/auth', { state: { from: location } });
+      } 
+      else {
+        const err = await res.json().catch(() => null);
+        console.error("Failed to add to cart", err);
+
+        toast.error((err && err.error) || "Failed to add item to cart");
       }
-    })();
-  };
+    } catch (err) {
+      console.error("Add to cart error", err);
+      toast.error("Could not add item to cart");
+    } finally {
+      setItemActionLoading(false);
+    }
+  })();
+};
+
 
   const navigateToAllProducts = () => navigate("/products");
 
@@ -1149,13 +1154,6 @@ const discountPercentage =
                   </div>
                 )}
               </div>
-
-              {/* Stock Information */}
-              {!isOutOfStock && product.stock && (
-                <div className="text-xs text-gray-500">
-                  {product.stock} items available
-                </div>
-              )}
 
               <div>
                 <h3 className="font-semibold mb-2">Description</h3>
