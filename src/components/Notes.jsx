@@ -1,18 +1,4 @@
 import React, { useEffect, useState } from "react";
-
-/**
- * NotesBlock
- *
- * Props:
- * - productId (string|number) - optional, if provided component will fetch notes from backend
- * - notes (array|object) - optional, if provided component will use this instead of fetching
- *
- * Expected backend JSON examples (either):
- * 1) { "notes": [ { "type": "Top notes", "text": "Citrusy top notes..." }, ... ] }
- * 2) { "top": "Citrusy top notes...", "heart": "Spicy heart notes...", "base": "Woody base..." }
- *
- * Endpoint used (example): GET /api/products/:productId/notes
- */
 const Notes = ({ productId, notes: initialNotesProp }) => {
   const [notes, setNotes] = useState(null); // normalized array: [{type, text}]
   const [loading, setLoading] = useState(false);

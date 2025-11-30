@@ -70,9 +70,9 @@ export const Navbar = ({ currentPage, setCurrentPage }) => {
       const controller = new AbortController();
       const endpoints = [
         `${API_BASE}/api/products/products/`,
-        `${API_BASE}/api/products/`,
-        `${API_BASE}/products/`,
-        `${API_BASE}/api/products-list/`,
+        // `${API_BASE}/api/products/`,
+        // `${API_BASE}/products/`,
+        // `${API_BASE}/api/products-list/`,
       ];
 
       let lastError = null;
