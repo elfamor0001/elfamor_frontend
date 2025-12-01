@@ -24,6 +24,13 @@ import PrivacyPolicy from './pages/PrivacyPolicy.jsx';
 const App = () => {
   const [currentPage, setCurrentPage] = useState('home');
 
+  useEffect(() => {
+  fetch("https://elfamor.pythonanywhere.com/accounts/csrf/", {
+    method: "GET",
+    credentials: "include",
+  });
+}, []);
+
   return (
     <>
       <ScrollToTop />
