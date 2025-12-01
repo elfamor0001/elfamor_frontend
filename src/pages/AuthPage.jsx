@@ -600,8 +600,8 @@ const handlePhoneChange = (e) => {
               {mode === "login" ? "Create Account" : "Sign in"}
             </button>
             <div>
-              <a href="#" className="hover:underline mr-2">Privacy</a>
-              <a href="#" className="hover:underline">Terms</a>
+              <a href="/privacy-policy" className="hover:underline mr-2">Privacy</a>
+              <a href="/terms" className="hover:underline">Terms</a>
             </div>
           </div>
         )}

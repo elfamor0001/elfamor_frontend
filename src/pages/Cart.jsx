@@ -573,14 +573,14 @@ const Cart = () => {
   const cartItems = cart?.items || [];
 
   return (
-    <div className="relative min-h-screen bg-[#EFEFEF] px-3 sm:px-6 lg:px-8 py-6 sm:py-30">
-      <div className="mx-auto max-w-5xl">
+    <div className="relative min-h-screen bg-[#EFEFEF] px-3 sm:px-6 lg:px-8 py-6 sm:py-20 lg:py-6 mt-21 lg:mt-21">
+      <div className="">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 sm:mb-12">
-          <h1 className="text-[12px] text-gray-900 mb-4 sm:mb-0">YOUR CART</h1>
+        <div className="flex flex-row sm:flex-row sm:items-center justify-between mb-6 sm:mb-10">
+          <h1 className="text-[12px] text-gray-900 sm:mb-0">YOUR CART</h1>
           <button
             onClick={navigateToAllProducts}
-            className="text-[12px] text-gray-700 cursor-pointer self-start sm:self-auto"
+            className="text-[12px] text-gray-700 cursor-pointer self-end sm:self-auto"
           >
             CONTINUE SHOPPING
           </button>
@@ -613,7 +613,7 @@ const Cart = () => {
                 const stockStatus = getStockStatus(item);
 
                 return (
-                  <div key={item?.id ?? Math.random()} className={`bg-[#EFEFEF] p-2 sm:p-6 border rounded ${outOfStock ? 'border-red-300 bg-red-50' : ''}`}>
+                  <div key={item?.id ?? Math.random()} className={`bg-[#EFEFEF] p-2 sm:p-4 border rounded ${outOfStock ? 'border-red-300 bg-red-50' : ''}`}>
                     <div className="flex flex-row gap-2 items-center">
                       <div className="flex-shrink-0">
                         <img
@@ -730,18 +730,6 @@ const Cart = () => {
                       </p>
                     </div>
                   )}
-                </div>
-
-                <div className="mb-4">
-                  <label className="flex items-start gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={hasGiftCard}
-                      onChange={(e) => setHasGiftCard(e.target.checked)}
-                      className="mt-1 w-4 h-4 text-black bg-gray-100 cursor-pointer border-gray-700 rounded"
-                    />
-                    <span className="text-xs text-gray-700 leading-relaxed">HAVE A GIFT CARD?</span>
-                  </label>
                 </div>
 
                 {/* Checkout button from first code with enhanced styling */}

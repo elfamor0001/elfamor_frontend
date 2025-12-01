@@ -209,10 +209,10 @@ const MainPage = () => {
                       {product.name}
                     </h3>
                     <p className="text-xs text-gray-600">
-                      {product.price
-                        ? typeof product.price === "string"
-                          ? product.price
-                          : `RS. ${Number(product.price).toFixed(2)}`
+                      {product.discounted_price
+                        ? typeof product.discounted_price === "string"
+                          ? product.discounted_price
+                          : `₹ ${Number(product.discounted_price).toFixed(2)}`
                         : ""}
                     </p>
                   </div>
@@ -263,10 +263,10 @@ const MainPage = () => {
                         {product.name}
                       </h3>
                       <p className="text-xs text-gray-600">
-                        {product.price
-                          ? typeof product.price === "string"
-                            ? product.price
-                            : `RS. ${Number(product.price).toFixed(2)}`
+                        {product.discounted_price
+                          ? typeof product.discounted_price === "string"
+                            ? product.discounted_price
+                            : `RS. ${Number(product.discounted_price).toFixed(2)}`
                           : ""}
                       </p>
                     </div>

@@ -256,14 +256,6 @@ const OrderHistoryPage = () => {
                       >
                         View Details
                       </Link>
-                      {order.status === 'paid' && (
-                        <button
-                          onClick={() => handleReorder(order)}
-                          className="inline-flex items-center px-4 py-2 border border-black text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 transition-colors"
-                        >
-                          Buy Again
-                        </button>
-                      )}
                     </div>
                   </div>
                 </div>

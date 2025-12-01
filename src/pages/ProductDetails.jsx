@@ -960,9 +960,6 @@ const discountPercentage =
         <button onClick={navigateToAllProducts} className="px-3 py-2 bg-black text-white rounded">
           Back to products
         </button>
-        <div className="mt-6 text-sm text-gray-600">
-          Note: If the browser console shows CORS errors (no Access-Control-Allow-Origin), enable your frontend origin in Django's CORS settings (or allow all origins for dev).
-        </div>
       </div>
     );
   }
@@ -1014,8 +1011,8 @@ const discountPercentage =
 
   return (
     <div className="min-h-screen bg-[#efefef] text-sm lg:py-12 mt-21">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-[80px_1fr_500px] gap-6 items-start">
+      <div className="px-2 xl:px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[80px_1fr_1fr] gap-6 xl:gap-0 items-start">
           {/* Thumbnails: vertical on lg, horizontal on mobile */}
           <div className="order-2 lg:order-1">
             <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-visible py-2">
@@ -1086,18 +1083,18 @@ const discountPercentage =
       )}
 
       <div className="flex flex-col items-end">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <span className="text-lg lg:text-xl font-bold text-gray-900">
-            RS. {discounted.toLocaleString()}
+            ₹ {discounted.toLocaleString()}
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-500 line-through">
-            RS. {price1.toLocaleString()}
+        <div className="flex items-center gap-1">
+          <span className="text-xs font-medium text-gray-500 line-through">
+            ₹ {price1.toLocaleString()}
           </span>
           <span className="text-xs text-red-600 font-semibold">
-            Save RS. {(price1 - discounted).toLocaleString()}
+            Save ₹ {(price1 - discounted).toLocaleString()}
           </span>
         </div>
       </div>
@@ -1105,7 +1102,7 @@ const discountPercentage =
     </div>
   ) : (
     <div className="text-lg lg:text-xl font-semibold text-gray-900">
-      RS. {price1.toLocaleString()}
+      ₹ {price1.toLocaleString()}
     </div>
   )}
 </div>

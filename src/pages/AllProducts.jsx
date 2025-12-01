@@ -615,7 +615,7 @@ const AllProducts = () => {
                   </div>
                   <div className="pt-3 bg-[#efefef]">
                     <h3 className="text-xs font-medium text-gray-900">{product.name}</h3>
-                    <p className="text-xs text-gray-600 mt-1">{product.priceDisplay}</p>
+                    <p className="text-xs text-gray-600 mt-1">{product.discounted_price}</p>
                   </div>
                 </div>
               </div>
