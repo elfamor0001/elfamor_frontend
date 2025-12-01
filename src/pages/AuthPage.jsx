@@ -225,35 +225,16 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
 
 const API_BASE = "https://elfamor.pythonanywhere.com";
+// const API_BASE = "http://localhost:8000";
 
-// Correct GET CSRF endpoint
-async function preloadCSRF() {
-  try {
-    await fetch(`${API_BASE}/accounts/get-csrf-token/`, {
-      method: "GET",
-      credentials: "include",
-      mode: "cors",
-    });
-    console.log("CSRF cookie preloaded");
-  } catch (err) {
-    console.warn("CSRF preload failed:", err);
-  }
-}
-
-async function getCSRFToken() {
-  try {
-    const res = await fetch(`${API_BASE}/accounts/get-csrf-token/`, {
-      method: "GET",
-      credentials: "include",
-      mode: "cors",
-    });
-    const data = await res.json().catch(() => ({}));
-    return data.csrfToken || data.csrftoken || "";
-  } catch (e) {
-    console.warn("getCSRFToken failed", e);
-    return "";
-  }
-}
+// Get CSRF token
+const getCSRFToken = async () => {
+  const res = await fetch(`${API_BASE}/accounts/csrf/`, {
+    credentials: "include",
+  });
+  const data = await res.json();
+  return data.csrfToken || data.csrf_token || "";
+};
 
 const AuthPage = () => {
   const { user, login } = useAuth();
@@ -261,7 +242,7 @@ const AuthPage = () => {
   const isMounted = useRef(true);
 
   const [mode, setMode] = useState("login");
-  const [step, setStep] = useState("phone");
+  const [step, setStep] = useState("phone"); // 'phone', 'code'
   const [phone, setPhone] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [email, setEmail] = useState("");
@@ -272,9 +253,28 @@ const AuthPage = () => {
   const [countdown, setCountdown] = useState(0);
   const [canResend, setCanResend] = useState(true);
 
-  // PRELOAD CSRF cookie on mount → CRITICAL FOR iOS
+  // Countdown timer for resend code
   useEffect(() => {
-    preloadCSRF().then(() => setIsInitialLoad(false));
+    let timer;
+    if (countdown > 0) {
+      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+    } else {
+      setCanResend(true);
+    }
+    return () => clearTimeout(timer);
+  }, [countdown]);
+
+  // Reload only on very first visit to the app
+  useEffect(() => {
+    const hasVisited = sessionStorage.getItem('hasVisitedAuth');
+    
+    if (!hasVisited) {
+      console.log("🔄 First visit to auth page - reloading...");
+      sessionStorage.setItem('hasVisitedAuth', 'true');
+      window.location.reload();
+    } else {
+      setIsInitialLoad(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -285,26 +285,32 @@ const AuthPage = () => {
     if (user) navigate("/", { replace: true });
   }, [user, navigate]);
 
+const validatePhone = (phoneNumber) => {
+  const cleaned = phoneNumber.replace(/\D/g, '');
+  return cleaned.length === 10;
+};
 
-  function validatePhone(p) {
-    return p.replace(/\D/g, "").length === 10;
+const formatPhone = (phoneNumber) => {
+  const cleaned = phoneNumber.replace(/\D/g, '');
+  
+  // Format as +91 XXXXXXXXXX or XXXXXXXXXX
+  if (cleaned.length === 0) return '';
+  if (cleaned.length <= 5) return cleaned;
+  if (cleaned.length <= 10) return `${cleaned.slice(0, 5)} ${cleaned.slice(5)}`;
+  return cleaned.slice(0, 10); // Ensure max 10 digits
+};
+
+const handlePhoneChange = (e) => {
+  const input = e.target.value;
+  // Allow backspace to work properly
+  if (input.length < phone.length) {
+    setPhone(input);
+    return;
   }
-
-  function formatPhone(p) {
-    const cleaned = p.replace(/\D/g, "");
-    if (cleaned.length <= 5) return cleaned;
-    if (cleaned.length <= 10) return cleaned.slice(0, 5) + " " + cleaned.slice(5);
-    return cleaned.slice(0, 10);
-  }
-
-  const handlePhoneChange = (e) => {
-    const input = e.target.value;
-    if (input.length < phone.length) {
-      setPhone(input);
-      return;
-    }
-    setPhone(formatPhone(input));
-  };
+  
+  const formatted = formatPhone(input);
+  setPhone(formatted);
+};
 
   const requestVerificationCode = async () => {
     if (!validatePhone(phone)) {
@@ -318,42 +324,43 @@ const AuthPage = () => {
 
     try {
       const csrfToken = await getCSRFToken();
-      const res = await fetch(`${API_BASE}/accounts/send-verification-code/`, {
+      const endpoint = "/accounts/send-verification-code/";
+      
+      const res = await fetch(`${API_BASE}${endpoint}`, {
         method: "POST",
         credentials: "include",
-        mode: "cors",
         headers: {
           "Content-Type": "application/json",
-          ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
+          "X-CSRFToken": csrfToken,
         },
-        body: JSON.stringify({ phone: phone.replace(/\s/g, "") }),
+        body: JSON.stringify({ phone: phone.replace(/\s/g, '') }),
       });
 
       const data = await res.json();
-
-      if (!isMounted.current) return;
+      
+      if (!isMounted.current) return false;
 
       if (res.ok) {
-        setMsg("Verification code sent!");
+        setMsg("Verification code sent to your phone");
         setStep("code");
-        setCountdown(60);
+        setCountdown(60); // 60 seconds countdown
         setCanResend(false);
         return true;
       } else {
-        setError(data.error || "Failed to send code");
+        setError(data.error || "Failed to send verification code");
         return false;
       }
     } catch (err) {
       setError("Network error. Please try again.");
       return false;
     } finally {
-      setLoading(false);
+      if (isMounted.current) setLoading(false);
     }
   };
 
   const verifyCodeAndLogin = async () => {
-    if (verificationCode.length !== 6) {
-      setError("Enter the 6-digit code");
+    if (!verificationCode || verificationCode.length !== 6) {
+      setError("Please enter the 6-digit verification code");
       return;
     }
 
@@ -363,69 +370,75 @@ const AuthPage = () => {
 
     try {
       const csrfToken = await getCSRFToken();
-      const res = await fetch(`${API_BASE}/accounts/phone-login/`, {
+      const endpoint = "/accounts/phone-login/";
+      
+      const res = await fetch(`${API_BASE}${endpoint}`, {
         method: "POST",
         credentials: "include",
-        mode: "cors",
         headers: {
           "Content-Type": "application/json",
-          ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
+          "X-CSRFToken": csrfToken,
         },
-        body: JSON.stringify({
-          phone: phone.replace(/\s/g, ""),
-          verification_code: verificationCode,
+        body: JSON.stringify({ 
+          phone: phone.replace(/\s/g, ''), 
+          verification_code: verificationCode 
         }),
       });
 
       const data = await res.json();
-
+      
       if (!isMounted.current) return;
 
       if (res.ok) {
-        login(data.user);
         setMsg("Login successful!");
+        if (data.user) {
+          login(data.user);
+        }
       } else {
-        setError(data.error || "Invalid code");
+        setError(data.error || "Invalid verification code");
       }
-    } catch {
-      setError("Network error.");
+    } catch (err) {
+      setError("Network error. Please try again.");
     } finally {
-      setLoading(false);
+      if (isMounted.current) setLoading(false);
     }
   };
 
   const handleRegister = async () => {
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Invalid email");
-      return;
-    }
-
     setLoading(true);
     setError("");
     setMsg("");
 
+    // Validate email
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Invalid email format");
+      setLoading(false);
+      return;
+    }
+
     try {
       const csrfToken = await getCSRFToken();
-      const res = await fetch(`${API_BASE}/accounts/register/`, {
+      const endpoint = "/accounts/register/";
+      
+      const res = await fetch(`${API_BASE}${endpoint}`, {
         method: "POST",
         credentials: "include",
-        mode: "cors",
         headers: {
           "Content-Type": "application/json",
-          ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
+          "X-CSRFToken": csrfToken,
         },
-        body: JSON.stringify({
-          email,
-          phone: phone.replace(/\s/g, ""),
+        body: JSON.stringify({ 
+          email, 
+          phone: phone.replace(/\s/g, '') 
         }),
       });
 
       const data = await res.json();
-
+      
       if (!isMounted.current) return;
 
       if (res.ok) {
-        setMsg("Registered! Code sent.");
+        setMsg("Registration successful! Verification code sent to your phone.");
         setStep("code");
         setCountdown(60);
         setCanResend(false);
@@ -433,17 +446,35 @@ const AuthPage = () => {
         setError(data.error || "Registration failed");
       }
     } catch {
-      setError("Network error.");
+      setError("Network error. Please try again.");
     } finally {
-      setLoading(false);
+      if (isMounted.current) setLoading(false);
     }
   };
 
+  const resendCode = async () => {
+    if (!canResend) return;
+    
+    setCanResend(false);
+    setCountdown(60);
+    await requestVerificationCode();
+  };
 
+  const resetFlow = () => {
+    setStep("phone");
+    setVerificationCode("");
+    setError("");
+    setMsg("");
+  };
+
+  // Show loading during initial reload
   if (isInitialLoad) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading...
+      <div className="min-h-screen flex items-center justify-center bg-[#efefef] font-sans">
+        <div className="text-center">
+          <div className="font-logo text-5xl mb-4">Elfamor</div>
+          <div className="text-lg">Loading...</div>
+        </div>
       </div>
     );
   }
@@ -569,8 +600,8 @@ const AuthPage = () => {
               {mode === "login" ? "Create Account" : "Sign in"}
             </button>
             <div>
-              <a href="#" className="hover:underline mr-2">Privacy</a>
-              <a href="#" className="hover:underline">Terms</a>
+              <a href="/privacy-policy" className="hover:underline mr-2">Privacy</a>
+              <a href="/terms" className="hover:underline">Terms</a>
             </div>
           </div>
         )}
