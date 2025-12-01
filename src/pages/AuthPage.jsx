@@ -228,9 +228,12 @@ const API_BASE = "https://elfamor.pythonanywhere.com";
 // const API_BASE = "http://localhost:8000";
 
 // Get CSRF token
-const getCSRFToken = () => {
-  const match = document.cookie.match(/csrftoken=([^;]+)/);
-  return match ? match[1] : "";
+const getCSRFToken = async () => {
+  const res = await fetch(`${API_BASE}/accounts/csrf/`, {
+    credentials: "include",
+  });
+  const data = await res.json();
+  return data.csrfToken || data.csrf_token || "";
 };
 
 const AuthPage = () => {

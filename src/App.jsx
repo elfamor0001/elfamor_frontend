@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Navbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx';
 import { Route, Routes } from 'react-router-dom';
@@ -7,7 +7,6 @@ import Home from './pages/Home.jsx';
 import ProductDetails from './pages/ProductDetails.jsx';
 import Cart from './pages/Cart.jsx';
 import RefundPolicy from './pages/RefundPolicy.jsx';
-import FAQs from './pages/Faqs.jsx';
 import AuthPage from './pages/AuthPage.jsx';
 import ContactUs from './pages/ContactUs.jsx';
 import Terms from './pages/Terms.jsx';
@@ -23,13 +22,6 @@ import PrivacyPolicy from './pages/PrivacyPolicy.jsx';
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState('home');
-
-  useEffect(() => {
-  fetch("https://elfamor.pythonanywhere.com/accounts/csrf/", {
-    method: "GET",
-    credentials: "include",
-  });
-}, []);
 
   return (
     <>
