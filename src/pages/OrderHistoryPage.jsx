@@ -16,7 +16,7 @@ const OrderHistoryPage = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const response = await fetch('https://elfamor.pythonanywhere.com/api/payments/orders/', {
+      const response = await fetch('https://api.elfamor.com/api/payments/orders/', {
         credentials: 'include',
       });
       
@@ -293,7 +293,7 @@ const handleReorder = (order) => {
 // CSRF token helper (you should have this already)
 const getCSRFToken = async () => {
   try {
-    const response = await fetch('https://elfamor.pythonanywhere.com/api/csrf/', {
+    const response = await fetch('https://api.elfamor.com/api/csrf/', {
       credentials: 'include',
     });
     const data = await response.json();

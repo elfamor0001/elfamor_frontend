@@ -21,7 +21,7 @@ export const Navbar = ({ currentPage, setCurrentPage }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const API_BASE = "https://elfamor.pythonanywhere.com";
+  const API_BASE = "https://api.elfamor.com";
 
   // State for dynamic cart count
   const [dynamicCartCount, setDynamicCartCount] = useState(0);

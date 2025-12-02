@@ -30,7 +30,7 @@
 //   const calculateShipping = async (pincode, cartItems) => {
 //     try {
 //       const csrfToken = await getCSRFToken();
-//       const response = await fetch('https://elfamor.pythonanywhere.com/api/payments/calculate-shipping/', {
+//       const response = await fetch('https://api.elfamor.com/api/payments/calculate-shipping/', {
 //         method: 'POST',
 //         headers: {
 //           'Content-Type': 'application/json',
@@ -122,7 +122,7 @@
 //   const fetchCart = useCallback(async () => {
 //     setLoading(true);
 //     try {
-//       const res = await fetch('https://elfamor.pythonanywhere.com/api/cart/', {
+//       const res = await fetch('https://api.elfamor.com/api/cart/', {
 //         method: 'GET',
 //         credentials: 'include',
 //       });
@@ -162,7 +162,7 @@
 //     try {
 //       const cartTotals = getCartTotals(cart.items);
 //       const csrfToken = await getCSRFToken();
-//       const response = await fetch('https://elfamor.pythonanywhere.com/api/payments/create-order/', {
+//       const response = await fetch('https://api.elfamor.com/api/payments/create-order/', {
 //         method: 'POST',
 //         headers: {
 //           'Content-Type': 'application/json',
@@ -196,7 +196,7 @@
 //   const verifyPayment = async (paymentData) => {
 //     try {
 //       const csrfToken = await getCSRFToken();
-//       const response = await fetch('https://elfamor.pythonanywhere.com/api/payments/verify-payment/', {
+//       const response = await fetch('https://api.elfamor.com/api/payments/verify-payment/', {
 //         method: 'POST',
 //         headers: {
 //           'Content-Type': 'application/json',
@@ -556,7 +556,7 @@ const CheckoutPage = () => {
   const calculateShipping = async (pincode, cartItems) => {
     try {
       const csrfToken = await getCSRFToken();
-      const response = await fetch('https://elfamor.pythonanywhere.com/api/payments/calculate-shipping/', {
+      const response = await fetch('https://api.elfamor.com/api/payments/calculate-shipping/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -655,7 +655,7 @@ const getCartTotals = (cartItems) => {
   const fetchCart = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('https://elfamor.pythonanywhere.com/api/cart/', {
+      const res = await fetch('https://api.elfamor.com/api/cart/', {
         method: 'GET',
         credentials: 'include',
       });
@@ -696,7 +696,7 @@ const getCartTotals = (cartItems) => {
       const cartTotals = getCartTotals(cart?.items || []);
 
       const csrfToken = await getCSRFToken();
-      const response = await fetch('https://elfamor.pythonanywhere.com/api/payments/create-order/', {
+      const response = await fetch('https://api.elfamor.com/api/payments/create-order/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -730,7 +730,7 @@ const getCartTotals = (cartItems) => {
   const verifyPayment = async (paymentData) => {
     try {
       const csrfToken = await getCSRFToken();
-      const response = await fetch('https://elfamor.pythonanywhere.com/api/payments/verify-payment/', {
+      const response = await fetch('https://api.elfamor.com/api/payments/verify-payment/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

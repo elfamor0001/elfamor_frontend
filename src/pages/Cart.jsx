@@ -17,7 +17,7 @@
 //   const fetchCart = async () => {
 //     setLoading(true);
 //     try {
-//       const res = await fetch('https://elfamor.pythonanywhere.com/api/cart/', {
+//       const res = await fetch('https://api.elfamor.com/api/cart/', {
 //         method: 'GET',
 //         credentials: 'include',
 //       });
@@ -44,7 +44,7 @@
 //     setItemActionLoading((prev) => ({ ...prev, [productId]: true }));
 //     try {
 //       const csrfToken = await getCSRFToken();
-//       const res = await fetch('https://elfamor.pythonanywhere.com/api/cart/update/', {
+//       const res = await fetch('https://api.elfamor.com/api/cart/update/', {
 //         method: 'PUT',
 //         credentials: 'include',
 //         headers: {
@@ -69,7 +69,7 @@
 //     setItemActionLoading((prev) => ({ ...prev, [productId]: true }));
 //     try {
 //       const csrfToken = await getCSRFToken();
-//       const res = await fetch('https://elfamor.pythonanywhere.com/api/cart/remove/', {
+//       const res = await fetch('https://api.elfamor.com/api/cart/remove/', {
 //         method: 'POST',
 //         credentials: 'include',
 //         headers: {
@@ -343,7 +343,7 @@ const Cart = () => {
   const fetchCart = async () => {
     setLoading(true);
     try {
-      const res = await fetch('https://elfamor.pythonanywhere.com/api/cart/', {
+      const res = await fetch('https://api.elfamor.com/api/cart/', {
         method: 'GET',
         credentials: 'include',
       });
@@ -370,7 +370,7 @@ const Cart = () => {
     setItemActionLoading((prev) => ({ ...prev, [productId]: true }));
     try {
       const csrfToken = await getCSRFToken();
-      const res = await fetch('https://elfamor.pythonanywhere.com/api/cart/update/', {
+      const res = await fetch('https://api.elfamor.com/api/cart/update/', {
         method: 'PUT',
         credentials: 'include',
         headers: {
@@ -395,7 +395,7 @@ const Cart = () => {
     setItemActionLoading((prev) => ({ ...prev, [productId]: true }));
     try {
       const csrfToken = await getCSRFToken();
-      const res = await fetch('https://elfamor.pythonanywhere.com/api/cart/remove/', {
+      const res = await fetch('https://api.elfamor.com/api/cart/remove/', {
         method: 'POST',
         credentials: 'include',
         headers: {

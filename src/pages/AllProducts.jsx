@@ -189,7 +189,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-const API_BASE = (typeof window !== "undefined" && window.__API_BASE__) || "https://elfamor.pythonanywhere.com";
+const API_BASE = (typeof window !== "undefined" && window.__API_BASE__) || "https://api.elfamor.com";
 const FALLBACK_IMAGE = "/src/assets/logo.png";
 
 const getProductImage = (p) => {

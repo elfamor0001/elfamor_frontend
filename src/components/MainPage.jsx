@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import bgVideo from "../assets/bgvideo.mp4";
 
-const API_BASE = "https://elfamor.pythonanywhere.com"; // ✅ one stable endpoint
+const API_BASE = "https://api.elfamor.com"; // ✅ one stable endpoint
 const FALLBACK_IMAGE = "/src/assets/logo.png";
 
 const getProductImage = (p) => {

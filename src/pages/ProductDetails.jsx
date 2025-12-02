@@ -7,7 +7,7 @@
 // import FALLBACK_IMG from "../assets/logo.png";
 
 // const API_BASE =
-//   (typeof window !== "undefined" && window.__API_BASE__) || "https://elfamor.pythonanywhere.com";
+//   (typeof window !== "undefined" && window.__API_BASE__) || "https://api.elfamor.com";
 
 // const FALLBACK_IMAGE = FALLBACK_IMG || "/logo.png";
 
@@ -270,7 +270,7 @@
 //       try {
 //         setItemActionLoading(true);
 //         const csrfToken = await getCSRFToken();
-//         const res = await fetch('https://elfamor.pythonanywhere.com/api/cart/add/', {
+//         const res = await fetch('https://api.elfamor.com/api/cart/add/', {
 //           method: 'POST',
 //           credentials: 'include',
 //           headers: {
@@ -629,7 +629,7 @@ import { toast } from "react-hot-toast";
 import FALLBACK_IMG from "../assets/logo.png";
 
 const API_BASE =
-  (typeof window !== "undefined" && window.__API_BASE__) || "https://elfamor.pythonanywhere.com";
+  (typeof window !== "undefined" && window.__API_BASE__) || "https://api.elfamor.com";
 
 const FALLBACK_IMAGE = FALLBACK_IMG || "/logo.png";
 
@@ -897,7 +897,7 @@ const discountPercentage =
       setItemActionLoading(true);
       const csrfToken = await getCSRFToken();
 
-      const res = await fetch('https://elfamor.pythonanywhere.com/api/cart/add/', {
+      const res = await fetch('https://api.elfamor.com/api/cart/add/', {
         method: 'POST',
         credentials: 'include',
         headers: {

@@ -14,7 +14,7 @@
 
 //   const fetchOrderDetail = async () => {
 //     try {
-//       const response = await fetch(`https://elfamor.pythonanywhere.com/api/payments/orders/${orderId}/`, {
+//       const response = await fetch(`https://api.elfamor.com/api/payments/orders/${orderId}/`, {
 //         credentials: 'include',
 //       });
       
@@ -269,7 +269,7 @@ const OrderDetailPage = () => {
 
   const fetchOrderDetail = async () => {
     try {
-      const response = await fetch(`https://elfamor.pythonanywhere.com/api/payments/orders/${orderId}/`, {
+      const response = await fetch(`https://api.elfamor.com/api/payments/orders/${orderId}/`, {
         credentials: 'include',
       });
       

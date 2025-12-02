@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
 
-const API_BASE = "https://elfamor.pythonanywhere.com";
+const API_BASE = "https://api.elfamor.com";
 // const API_BASE = "http://localhost:8000";
 
 // Get CSRF token

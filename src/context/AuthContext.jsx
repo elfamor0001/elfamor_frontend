@@ -1,7 +1,7 @@
 // import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 // import { getCSRFToken } from "./authUtils.js";
 
-// const API_BASE = "https://elfamor.pythonanywhere.com";
+// const API_BASE = "https://api.elfamor.com";
 // const AuthContext = createContext();
 
 // export const useAuth = () => useContext(AuthContext);
@@ -234,7 +234,7 @@ export const CartProvider = ({ children }) => {
   );
 }
 
-const API_BASE = "https://elfamor.pythonanywhere.com"; 
+const API_BASE = "https://api.elfamor.com"; 
 // const API_BASE = "http://localhost:8000"; 
 
 const AuthContext = createContext();

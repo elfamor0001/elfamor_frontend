@@ -1,4 +1,4 @@
-const API_BASE = "https://elfamor.pythonanywhere.com";
+const API_BASE = "https://api.elfamor.com";
 
 export const getCSRFToken = async () => {
   const res = await fetch(`${API_BASE}/accounts/csrf/`, {
