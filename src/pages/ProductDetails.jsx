@@ -1231,7 +1231,7 @@ const discountPercentage =
                     </div>
                     <div className="space-y-1">
                       <h3 className="text-xs font-medium text-gray-900 tracking-wide">{p.name || "Product"}</h3>
-                      <p className="text-xs text-gray-600">{p.price ?? p.price_display ?? ""}</p>
+                      <p className="text-xs text-gray-600">{p.discounted_price ?? p.price_display ?? ""}</p>
                       {isSuggestedOutOfStock && (
                         <p className="text-xs text-red-600 font-medium">Out of Stock</p>
                       )}
