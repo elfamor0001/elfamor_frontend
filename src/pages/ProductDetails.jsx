@@ -2,6 +2,7 @@
 // import { useParams, useNavigate, useLocation } from "react-router-dom";
 // import { getCSRFToken } from '../context/authUtils.js';
 // import { useAuth } from "../context/AuthContext.jsx";
+// import { toast } from "react-hot-toast";
 
 // // prefer an imported fallback so bundlers (CRA/Vite) resolve it correctly
 // import FALLBACK_IMG from "../assets/logo.png";
@@ -236,9 +237,15 @@
 //   const isOutOfStock = product && (product.stock === 0 || !product.is_in_stock);
 
 //   // Calculate discount percentage
-//   const discountPercentage = product && product.discounted_price && product.price 
-//     ? Math.round(((product.price - product.discounted_price) / product.price) * 100)
+// const price1 = product ? Number(product.price) : 0;
+// const discounted = product ? Number(product.discounted_price) : 0;
+
+// const discountPercentage =
+//   price1 > 0 && discounted > 0 && discounted < price1
+//     ? Math.round(((price1 - discounted) / price1) * 100)
 //     : 0;
+
+
 
 //   // Enhanced quantity controls that respect stock limits
 //   const increment = () => {
@@ -253,52 +260,56 @@
 
 //   // Enhanced Add to Cart functionality from first code
 //   const handleAddToCart = () => {
-//     // Check if product is out of stock
-//     if (isOutOfStock) {
-//       alert("This product is currently out of stock");
-//       return;
-//     }
+//   if (isOutOfStock) {
+//     toast.error("This product is currently out of stock");
+//     return;
+//   }
 
-//     // if user not logged in, redirect to auth and preserve current location
-//     if (!user) {
-//       navigate('/auth', { state: { from: location } });
-//       return;
-//     }
+//   // Redirect if not logged in
+//   if (!user) {
+//     navigate('/auth', { state: { from: location } });
+//     return;
+//   }
 
-//     // Add to cart logic: POST to backend cart endpoint
-//     (async () => {
-//       try {
-//         setItemActionLoading(true);
-//         const csrfToken = await getCSRFToken();
-//         const res = await fetch('https://api.elfamor.com/api/cart/add/', {
-//           method: 'POST',
-//           credentials: 'include',
-//           headers: {
-//             'Content-Type': 'application/json',
-//             'X-CSRFToken': csrfToken,
-//           },
-//           body: JSON.stringify({ product_id: product.id, quantity }),
-//         });
-//         if (res.ok) {
-//           const data = await res.json();
-//           console.log('Added to cart', data);
-//           alert(`Added ${quantity} x ${product.name} to cart`);
-//         } else if (res.status === 401) {
-//           // backend says unauthenticated — redirect
-//           navigate('/auth', { state: { from: location } });
-//         } else {
-//           const err = await res.json().catch(() => null);
-//           console.error('Failed to add to cart', err);
-//           alert((err && err.error) || 'Failed to add item to cart');
-//         }
-//       } catch (err) {
-//         console.error('Add to cart error', err);
-//         alert('Could not add item to cart — check console for details');
-//       } finally {
-//         setItemActionLoading(false);
+//   (async () => {
+//     try {
+//       setItemActionLoading(true);
+//       const csrfToken = await getCSRFToken();
+
+//       const res = await fetch('https://api.elfamor.com/api/cart/add/', {
+//         method: 'POST',
+//         credentials: 'include',
+//         headers: {
+//           'Content-Type': 'application/json',
+//           'X-CSRFToken': csrfToken,
+//         },
+//         body: JSON.stringify({ product_id: product.id, quantity }),
+//       });
+
+//       if (res.ok) {
+//         const data = await res.json();
+//         console.log("Added to cart", data);
+
+//         toast.success(`Added ${quantity} x ${product.name} to cart`);
+//       } 
+//       else if (res.status === 401) {
+//         navigate('/auth', { state: { from: location } });
+//       } 
+//       else {
+//         const err = await res.json().catch(() => null);
+//         console.error("Failed to add to cart", err);
+
+//         toast.error((err && err.error) || "Failed to add item to cart");
 //       }
-//     })();
-//   };
+//     } catch (err) {
+//       console.error("Add to cart error", err);
+//       toast.error("Could not add item to cart");
+//     } finally {
+//       setItemActionLoading(false);
+//     }
+//   })();
+// };
+
 
 //   const navigateToAllProducts = () => navigate("/products");
 
@@ -328,9 +339,6 @@
 //         <button onClick={navigateToAllProducts} className="px-3 py-2 bg-black text-white rounded">
 //           Back to products
 //         </button>
-//         <div className="mt-6 text-sm text-gray-600">
-//           Note: If the browser console shows CORS errors (no Access-Control-Allow-Origin), enable your frontend origin in Django's CORS settings (or allow all origins for dev).
-//         </div>
 //       </div>
 //     );
 //   }
@@ -382,8 +390,8 @@
 
 //   return (
 //     <div className="min-h-screen bg-[#efefef] text-sm lg:py-12 mt-21">
-//       <div className="max-w-7xl mx-auto px-4">
-//         <div className="grid grid-cols-1 lg:grid-cols-[80px_1fr_500px] gap-6 items-start">
+//       <div className="px-2 xl:px-6">
+//         <div className="grid grid-cols-1 lg:grid-cols-[80px_1fr_1fr] gap-6 xl:gap-0 items-start">
 //           {/* Thumbnails: vertical on lg, horizontal on mobile */}
 //           <div className="order-2 lg:order-1">
 //             <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-visible py-2">
@@ -443,38 +451,41 @@
 //                   </div>
 //                 </div>
 //                 <div className="mt-1 text-right">
-//                   {product.discounted_price && product.discounted_price < product.price ? (
-//                     <div className="space-y-1">
-//                       {/* Discount Badge */}
-//                       {discountPercentage > 0 && (
-//                         <div className="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded">
-//                           {discountPercentage}% OFF
-//                         </div>
-//                       )}
-                      
-//                       {/* Price Display */}
-//                       <div className="flex flex-col items-end">
-//                         <div className="flex items-center gap-2">
-//                           <span className="text-lg lg:text-xl font-bold text-gray-900">
-//                             RS. {product.discounted_price.toLocaleString()}
-//                           </span>
-//                         </div>
-//                         <div className="flex items-center gap-2">
-//                           <span className="text-sm font-medium text-gray-500 line-through">
-//                             RS. {product.price.toLocaleString()}
-//                           </span>
-//                           <span className="text-xs text-red-600 font-semibold">
-//                             Save RS. {(product.price - product.discounted_price).toLocaleString()}
-//                           </span>
-//                         </div>
-//                       </div>
-//                     </div>
-//                   ) : (
-//                     <div className="text-lg lg:text-xl font-semibold text-gray-900">
-//                       RS. {product.price ? product.price.toLocaleString() : product.price_display ?? "—"}
-//                     </div>
-//                   )}
-//                 </div>
+//  {discounted > 0 && discounted < price1 ? (
+
+//     <div className="space-y-1">
+
+//       {discountPercentage > 0 && (
+//         <div className="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded">
+//           {discountPercentage}% OFF
+//         </div>
+//       )}
+
+//       <div className="flex flex-col items-end">
+//         <div className="flex items-center gap-1">
+//           <span className="text-lg lg:text-xl font-bold text-gray-900">
+//             ₹ {discounted.toLocaleString()}
+//           </span>
+//         </div>
+
+//         <div className="flex items-center gap-1">
+//           <span className="text-xs font-medium text-gray-500 line-through">
+//             ₹ {price1.toLocaleString()}
+//           </span>
+//           <span className="text-xs text-red-600 font-semibold">
+//             Save ₹ {(price1 - discounted).toLocaleString()}
+//           </span>
+//         </div>
+//       </div>
+
+//     </div>
+//   ) : (
+//     <div className="text-lg lg:text-xl font-semibold text-gray-900">
+//       ₹ {price1.toLocaleString()}
+//     </div>
+//   )}
+// </div>
+
 //               </div>
 
 //               {/* Enhanced Action Buttons from first code */}
@@ -599,7 +610,7 @@
 //                     </div>
 //                     <div className="space-y-1">
 //                       <h3 className="text-xs font-medium text-gray-900 tracking-wide">{p.name || "Product"}</h3>
-//                       <p className="text-xs text-gray-600">{p.price ?? p.price_display ?? ""}</p>
+//                       <p className="text-xs text-gray-600">{p.discounted_price ?? p.price_display ?? ""}</p>
 //                       {isSuggestedOutOfStock && (
 //                         <p className="text-xs text-red-600 font-medium">Out of Stock</p>
 //                       )}
@@ -616,6 +627,12 @@
 // };
 
 // export default ProductDetails;
+
+
+
+
+
+
 
 
 
@@ -645,6 +662,7 @@ function normalizeImageUrl(url) {
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [product, setProduct] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -657,7 +675,6 @@ const ProductDetails = () => {
   const [suggestedProducts, setSuggestedProducts] = useState([]);
   const [suggestedLoading, setSuggestedLoading] = useState(true);
   const [suggestedError, setSuggestedError] = useState("");
-  const location = useLocation();
   const { user } = useAuth();
 
   const prevQtyRef = useRef(0);
@@ -858,15 +875,13 @@ const ProductDetails = () => {
   const isOutOfStock = product && (product.stock === 0 || !product.is_in_stock);
 
   // Calculate discount percentage
-const price1 = product ? Number(product.price) : 0;
-const discounted = product ? Number(product.discounted_price) : 0;
+  const price1 = product ? Number(product.price) : 0;
+  const discounted = product ? Number(product.discounted_price) : 0;
 
-const discountPercentage =
-  price1 > 0 && discounted > 0 && discounted < price1
-    ? Math.round(((price1 - discounted) / price1) * 100)
-    : 0;
-
-
+  const discountPercentage =
+    price1 > 0 && discounted > 0 && discounted < price1
+      ? Math.round(((price1 - discounted) / price1) * 100)
+      : 0;
 
   // Enhanced quantity controls that respect stock limits
   const increment = () => {
@@ -879,58 +894,68 @@ const discountPercentage =
     setQuantity((q) => Math.max(1, q - 1));
   };
 
-  // Enhanced Add to Cart functionality from first code
+  // Enhanced Add to Cart functionality
   const handleAddToCart = () => {
-  if (isOutOfStock) {
-    toast.error("This product is currently out of stock");
-    return;
-  }
-
-  // Redirect if not logged in
-  if (!user) {
-    navigate('/auth', { state: { from: location } });
-    return;
-  }
-
-  (async () => {
-    try {
-      setItemActionLoading(true);
-      const csrfToken = await getCSRFToken();
-
-      const res = await fetch('https://api.elfamor.com/api/cart/add/', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken,
-        },
-        body: JSON.stringify({ product_id: product.id, quantity }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        console.log("Added to cart", data);
-
-        toast.success(`Added ${quantity} x ${product.name} to cart`);
-      } 
-      else if (res.status === 401) {
-        navigate('/auth', { state: { from: location } });
-      } 
-      else {
-        const err = await res.json().catch(() => null);
-        console.error("Failed to add to cart", err);
-
-        toast.error((err && err.error) || "Failed to add item to cart");
-      }
-    } catch (err) {
-      console.error("Add to cart error", err);
-      toast.error("Could not add item to cart");
-    } finally {
-      setItemActionLoading(false);
+    if (isOutOfStock) {
+      toast.error("This product is currently out of stock");
+      return;
     }
-  })();
-};
 
+    // Redirect if not logged in
+    if (!user) {
+      // Navigate to product-specific auth path and pass 'from' so we can return after login.
+      navigate(`/productdetails/auth`, { 
+        state: { 
+          from: { pathname: `/productdetails/${id}`, state: { quantity } }, 
+          alertMessage: "you need to login first to add the product to the cart!"
+        } 
+      });
+      return;
+    }
+
+    (async () => {
+      try {
+        setItemActionLoading(true);
+        const csrfToken = await getCSRFToken();
+
+        const res = await fetch('https://api.elfamor.com/api/cart/add/', {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+          },
+          body: JSON.stringify({ product_id: product.id, quantity }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          console.log("Added to cart", data);
+
+          toast.success(`Added ${quantity} x ${product.name} to cart`);
+        } 
+        else if (res.status === 401) {
+          navigate(`/productdetails/auth`, { 
+            state: { 
+              from: { pathname: `/productdetails/${id}`, state: { quantity } }, 
+              alertMessage: "you need to login first to add the product to the cart!"
+            } 
+          });
+        } 
+        else {
+          const err = await res.json().catch(() => null);
+          console.error("Failed to add to cart", err);
+
+          toast.error((err && err.error) || "Failed to add item to cart");
+        }
+      } catch (err) {
+        console.error("Add to cart error", err);
+        toast.error("Could not add item to cart");
+      } finally {
+        setItemActionLoading(false);
+      }
+    })();
+  };
 
   const navigateToAllProducts = () => navigate("/products");
 
@@ -1109,7 +1134,7 @@ const discountPercentage =
 
               </div>
 
-              {/* Enhanced Action Buttons from first code */}
+              {/* Enhanced Action Buttons */}
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleAddToCart}
