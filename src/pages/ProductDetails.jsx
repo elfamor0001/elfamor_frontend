@@ -907,7 +907,7 @@ const ProductDetails = () => {
       navigate(`/productdetails/auth`, { 
         state: { 
           from: { pathname: `/productdetails/${id}`, state: { quantity } }, 
-          alertMessage: "you need to login first to add the product to the cart!"
+          alertMessage: "Please log in to add this product to your cart."
         } 
       });
       return;
