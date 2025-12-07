@@ -443,7 +443,7 @@ const AuthPage = () => {
     if (alertMessage) {
       setNotice(alertMessage);
     } else if (from && typeof from.pathname === "string" && from.pathname.startsWith("/productdetails")) {
-      setNotice("Please login to add this product to your cart.");
+      setNotice("Please login to add to cart.");
     } else {
       setNotice("");
     }
