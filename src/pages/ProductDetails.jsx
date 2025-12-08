@@ -673,21 +673,21 @@ function saveGuestCart(items) {
 
 function addToGuestCartItem(productObj, qty) {
   const items = loadGuestCart();
-  const existingIndex = items.findIndex(i => i.product_id === (productObj.id ?? productObj.product_id));
+  const existingIndex = items.findIndex(i => i.product_id === (productObj?.id ?? productObj?.product_id));
   if (existingIndex > -1) {
-    items[existingIndex].quantity = Math.min((items[existingIndex].quantity || 0) + qty, productObj.stock || 9999);
+    items[existingIndex].quantity = Math.min((items[existingIndex].quantity || 0) + qty, productObj?.stock || 9999);
   } else {
     items.push({
-      product_id: productObj.id,
+      product_id: productObj?.id,
       quantity: qty,
       product_snapshot: {
-        id: productObj.id,
-        name: productObj.name,
-        price: productObj.price,
-        discounted_price: productObj.discounted_price,
-        primary_image: productObj.primary_image || (productObj.images && productObj.images[0]) || null,
-        volume_ml: productObj.volume_ml || null,
-        stock: productObj.stock ?? null,
+        id: productObj?.id,
+        name: productObj?.name,
+        price: productObj?.price,
+        discounted_price: productObj?.discounted_price,
+        primary_image: productObj?.primary_image || (productObj?.images && productObj.images[0]) || null,
+        volume_ml: productObj?.volume_ml || null,
+        stock: productObj?.stock ?? null,
       }
     });
   }
@@ -760,7 +760,8 @@ const ProductDetails = () => {
     return () => controller.abort();
   }, [id]);
 
-  const isOutOfStock = product && (product.stock === 0 || !product.is_in_stock);
+  // safe guards for product possibly being null
+  const isOutOfStock = !!product && (product.stock === 0 || !product.is_in_stock);
 
   const price1 = product ? Number(product.price) : 0;
   const discounted = product ? Number(product.discounted_price) : 0;
@@ -771,7 +772,7 @@ const ProductDetails = () => {
 
   const increment = () => {
     if (isOutOfStock) return;
-    setQuantity((q) => Math.min(product.stock || 10, q + 1));
+    setQuantity((q) => Math.min(product?.stock || 10, q + 1));
   };
 
   const decrement = () => {
@@ -788,7 +789,7 @@ const ProductDetails = () => {
     // Guest flow: save to localStorage and allow viewing cart
     if (!user) {
       addToGuestCartItem(product, quantity);
-      toast.success(`Added ${quantity} x ${product.name} to cart (saved for when you sign in)`);
+      toast.success(`Added ${quantity} x ${product?.name || "product"} to cart (saved for when you sign in)`);
       return;
     }
 
@@ -834,10 +835,14 @@ const ProductDetails = () => {
   };
 
   const getDisplayedSrc = () => {
-    if (product.images && product.images.length > 0) {
+    // return fallback while product not loaded yet
+    if (!product) return FALLBACK_IMG;
+
+    if (Array.isArray(product.images) && product.images.length > 0) {
       const chosen = product.images[currentImageIndex] || product.images[0];
       return thumbSrc(chosen);
     }
+
     const raw =
       product.primary_image?.url ||
       product.primary_image?.image ||
@@ -845,12 +850,14 @@ const ProductDetails = () => {
       product.image ||
       product.main_image ||
       product.image_url;
+
     return normalizeImageUrl(raw) || FALLBACK_IMG;
   };
 
-  const imgs = (product && product.images && product.images.length > 0)
+  // imgs: safe array for thumbnails; if product not loaded, use empty array
+  const imgs = (product && Array.isArray(product.images) && product.images.length > 0)
     ? product.images
-    : [{ id: "primary", image_url: product?.primary_image?.url || product?.primary_image || product?.image || product?.image_url || product?.main_image }];
+    : (product ? [{ id: "primary", image_url: product.primary_image?.url || product.primary_image || product.image || product.image_url || product.main_image }] : []);
 
   const displayed = getDisplayedSrc();
 
@@ -885,6 +892,7 @@ const ProductDetails = () => {
   }
 
   if (!product) {
+    // defensive: product still null after loading -> show fallback
     return (
       <div className="min-h-screen bg-[#EFEFEF] p-6">
         <div>No product found.</div>
@@ -901,7 +909,7 @@ const ProductDetails = () => {
         <div className="grid grid-cols-1 lg:grid-cols-[80px_1fr_1fr] gap-6 xl:gap-0 items-start">
           <div className="order-2 lg:order-1">
             <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-visible py-2">
-              {imgs.map((imgObj, idx) => (
+              {imgs.length > 0 ? imgs.map((imgObj, idx) => (
                 <button
                   key={imgObj.id ?? idx}
                   onClick={() => setCurrentImageIndex(idx)}
@@ -919,7 +927,12 @@ const ProductDetails = () => {
                     }}
                   />
                 </button>
-              ))}
+              )) : (
+                // show a single fallback thumbnail if no images yet
+                <div className="flex-shrink-0 w-20 h-20 p-1 rounded-md overflow-hidden border border-gray-200">
+                  <img src={FALLBACK_IMG} alt="thumb-fallback" className="w-full h-full object-cover" />
+                </div>
+              )}
             </div>
           </div>
 
