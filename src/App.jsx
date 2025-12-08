@@ -110,78 +110,48 @@ const App = () => {
   return (
     <>
       <ScrollToTop />
-
-      {/* Navbar */}
       <Navbar currentPage={currentPage} setCurrentPage={setCurrentPage} />
 
       <Routes>
-        {/* Public Pages */}
-        <Route path='/' element={<Home />} />
-        <Route path='/products' element={<AllProducts />} />
+        <Route path='/' element={<Home/>} />
+        <Route path='/products' element={<AllProducts/>} />
+        <Route path='/productdetails/:id' element={<ProductDetails/>} />
 
-        {/* Product Details */}
-        <Route path='/productdetails/:id' element={<ProductDetails />} />
-
-        {/* 🔥 New Route Required for Login Redirect From Product Page */}
-        <Route path='/productdetails/auth' element={<AuthPage />} />
-
-        {/* Auth Page */}
-        <Route path='/auth' element={<AuthPage />} />
+        {/* Cart is public so guest can add/view */}
+        <Route path='/cart' element={<Cart />} />
 
         {/* Protected Routes */}
-        <Route
-          path='/cart'
-          element={
-            <ProtectedRoute>
-              <Cart />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path='/orders'
-          element={
+        <Route path='/orders' element={
+          <ProtectedRoute>
             <OrderHistoryPage />
-          }
-        />
+          </ProtectedRoute>
+        }/>
+        <Route path='/checkout' element={
+          <ProtectedRoute>
+            <CheckoutPage />
+          </ProtectedRoute>
+        }/>
+        <Route path='/orders/:orderId' element={
+          <ProtectedRoute>
+            <OrderDetailPage />
+          </ProtectedRoute>
+        }/>
+        <Route path='/order-success' element={
+          <ProtectedRoute>
+            <OrderSuccessPage />
+          </ProtectedRoute>
+        }/>
 
-        <Route
-          path='/checkout'
-          element={
-            <ProtectedRoute>
-              <CheckoutPage />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path='/orders/:orderId'
-          element={
-            <ProtectedRoute>
-              <OrderDetailPage />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path='/order-success'
-          element={
-            <ProtectedRoute>
-              <OrderSuccessPage />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Static Public Pages */}
-        <Route path='/refund-policy' element={<RefundPolicy />} />
-        <Route path='/contact-us' element={<ContactUs />} />
-        <Route path='/terms' element={<Terms />} />
-        <Route path='/shipping-policy' element={<Shipping />} />
-        <Route path='/about' element={<AboutUs />} />
-        <Route path='/privacy-policy' element={<PrivacyPolicy />} />
+        {/* Public Routes */}
+        <Route path='/refund-policy' element={<RefundPolicy/>} />
+        <Route path='/auth' element={<AuthPage/>} />
+        <Route path='/contact-us' element={<ContactUs/>} />
+        <Route path='/terms' element={<Terms/>} />
+        <Route path='/shipping-policy' element={<Shipping/>} />
+        <Route path='/about' element={<AboutUs/>} />
+        <Route path='/privacy-policy' element={<PrivacyPolicy/>} />
       </Routes>
 
-      {/* Footer */}
       <Footer />
     </>
   );

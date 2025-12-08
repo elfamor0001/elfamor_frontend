@@ -393,24 +393,14 @@
 
 
 
-
-
-
-
-
-// AuthPage.jsx — full file with changes
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const API_BASE = "https://api.elfamor.com";
-// const API_BASE = "http://localhost:8000";
 
-// Get CSRF token
 const getCSRFToken = async () => {
-  const res = await fetch(`${API_BASE}/accounts/csrf/`, {
-    credentials: "include",
-  });
+  const res = await fetch(`${API_BASE}/accounts/csrf/`, { credentials: "include" });
   const data = await res.json();
   return data.csrfToken || data.csrf_token || "";
 };
@@ -422,34 +412,17 @@ const AuthPage = () => {
   const isMounted = useRef(true);
 
   const [mode, setMode] = useState("login");
-  const [step, setStep] = useState("phone"); // 'phone', 'code'
+  const [step, setStep] = useState("phone");
   const [phone, setPhone] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
   const [error, setError] = useState("");
-  const [notice, setNotice] = useState(""); // NEW: informational banner
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [countdown, setCountdown] = useState(0);
   const [canResend, setCanResend] = useState(true);
 
-  // If the auth page was reached with an alertMessage, show it
-  useEffect(() => {
-    const state = location.state || {};
-    const alertMessage = state.alertMessage;
-    // Fallback: if no alertMessage but 'from' points to productdetails, show the default
-    const from = state.from;
-    if (alertMessage) {
-      setNotice(alertMessage);
-    } else if (from && typeof from.pathname === "string" && from.pathname.startsWith("/productdetails")) {
-      setNotice("Please log in to add this product to your cart.");
-    } else {
-      setNotice("");
-    }
-  }, [location.state]);
-
-  // Countdown timer for resend code
   useEffect(() => {
     let timer;
     if (countdown > 0) {
@@ -460,12 +433,9 @@ const AuthPage = () => {
     return () => clearTimeout(timer);
   }, [countdown]);
 
-  // Reload only on very first visit to the app
   useEffect(() => {
     const hasVisited = sessionStorage.getItem('hasVisitedAuth');
-    
     if (!hasVisited) {
-      console.log("🔄 First visit to auth page - reloading...");
       sessionStorage.setItem('hasVisitedAuth', 'true');
       window.location.reload();
     } else {
@@ -477,19 +447,20 @@ const AuthPage = () => {
     return () => { isMounted.current = false; };
   }, []);
 
-  // If already logged-in, redirect back to where we came from (if present) or home
   useEffect(() => {
-    if (user) {
-      const state = location.state || {};
-      const from = state.from;
-      if (from && from.pathname) {
-        // redirect back to original page (e.g. /productdetails/:id)
-        navigate(from.pathname, { replace: true, state: from.state || {} });
-      } else {
-        navigate("/", { replace: true });
-      }
+    // Show any alert passed via navigation state
+    if (location?.state?.alert) {
+      setMsg(location.state.alert);
     }
-  }, [user, navigate, location.state]);
+
+    if (user) {
+      // After login: navigate back to 'from' (usually /cart) and pass along next.
+      const fromPath = location?.state?.from?.pathname || '/';
+      const nextPath = location?.state?.next;
+      navigate(fromPath, { replace: true, state: { next: nextPath } });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   const validatePhone = (phoneNumber) => {
     const cleaned = phoneNumber.replace(/\D/g, '');
@@ -498,22 +469,18 @@ const AuthPage = () => {
 
   const formatPhone = (phoneNumber) => {
     const cleaned = phoneNumber.replace(/\D/g, '');
-    
-    // Format as +91 XXXXXXXXXX or XXXXXXXXXX
     if (cleaned.length === 0) return '';
     if (cleaned.length <= 5) return cleaned;
     if (cleaned.length <= 10) return `${cleaned.slice(0, 5)} ${cleaned.slice(5)}`;
-    return cleaned.slice(0, 10); // Ensure max 10 digits
+    return cleaned.slice(0, 10);
   };
 
   const handlePhoneChange = (e) => {
     const input = e.target.value;
-    // Allow backspace to work properly
     if (input.length < phone.length) {
       setPhone(input);
       return;
     }
-    
     const formatted = formatPhone(input);
     setPhone(formatted);
   };
@@ -530,9 +497,7 @@ const AuthPage = () => {
 
     try {
       const csrfToken = await getCSRFToken();
-      console.log("CSRF Token:", csrfToken);
       const endpoint = "/accounts/send-verification-code/";
-      
       const res = await fetch(`${API_BASE}${endpoint}`, {
         method: "POST",
         credentials: "include",
@@ -544,13 +509,12 @@ const AuthPage = () => {
       });
 
       const data = await res.json();
-      
       if (!isMounted.current) return false;
 
       if (res.ok) {
         setMsg("Verification code sent to your phone");
         setStep("code");
-        setCountdown(60); // 60 seconds countdown
+        setCountdown(60);
         setCanResend(false);
         return true;
       } else {
@@ -578,7 +542,6 @@ const AuthPage = () => {
     try {
       const csrfToken = await getCSRFToken();
       const endpoint = "/accounts/phone-login/";
-      
       const res = await fetch(`${API_BASE}${endpoint}`, {
         method: "POST",
         credentials: "include",
@@ -586,30 +549,21 @@ const AuthPage = () => {
           "Content-Type": "application/json",
           "X-CSRFToken": csrfToken,
         },
-        body: JSON.stringify({ 
-          phone: phone.replace(/\s/g, ''), 
-          verification_code: verificationCode 
+        body: JSON.stringify({
+          phone: phone.replace(/\s/g, ''),
+          verification_code: verificationCode
         }),
       });
 
       const data = await res.json();
-      
+
       if (!isMounted.current) return;
 
       if (res.ok) {
         setMsg("Login successful!");
         if (data.user) {
-          // login in context
           login(data.user);
-
-          // After login, redirect back to `from` if provided in location.state
-          const state = location.state || {};
-          const from = state.from;
-          if (from && from.pathname) {
-            navigate(from.pathname, { replace: true, state: from.state || {} });
-          } else {
-            navigate("/", { replace: true });
-          }
+          // login triggers useEffect that navigates back to 'from' with next
         }
       } else {
         setError(data.error || "Invalid verification code");
@@ -626,7 +580,6 @@ const AuthPage = () => {
     setError("");
     setMsg("");
 
-    // Validate email
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setError("Invalid email format");
       setLoading(false);
@@ -636,7 +589,6 @@ const AuthPage = () => {
     try {
       const csrfToken = await getCSRFToken();
       const endpoint = "/accounts/register/";
-      
       const res = await fetch(`${API_BASE}${endpoint}`, {
         method: "POST",
         credentials: "include",
@@ -644,14 +596,13 @@ const AuthPage = () => {
           "Content-Type": "application/json",
           "X-CSRFToken": csrfToken,
         },
-        body: JSON.stringify({ 
-          email, 
-          phone: phone.replace(/\s/g, '') 
+        body: JSON.stringify({
+          email,
+          phone: phone.replace(/\s/g, '')
         }),
       });
 
       const data = await res.json();
-      
       if (!isMounted.current) return;
 
       if (res.ok) {
@@ -671,7 +622,6 @@ const AuthPage = () => {
 
   const resendCode = async () => {
     if (!canResend) return;
-    
     setCanResend(false);
     setCountdown(60);
     await requestVerificationCode();
@@ -684,7 +634,6 @@ const AuthPage = () => {
     setMsg("");
   };
 
-  // Show loading during initial reload
   if (isInitialLoad) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#efefef] font-sans">
@@ -703,27 +652,19 @@ const AuthPage = () => {
           <span className="font-logo text-5xl mb-2">Elfamor</span>
         </div>
 
-        {/* Notice banner shown when we were redirected from product details */}
-        {notice && (
-          <div className="mb-4 p-3 rounded bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm">
-            {notice}
-          </div>
-        )}
-
-        {/* Phone Input Step */}
         {step === "phone" && (
           <>
             <h2 className="text-2xl font-normal mb-2 text-center">
               {mode === "login" ? "Sign in with Phone" : "Create Account"}
             </h2>
             <p className="text-gray-700 text-center mb-6 text-base font-normal">
-              {mode === "login" 
-                ? "Enter your phone number to receive a verification code" 
+              {mode === "login"
+                ? "Enter your phone number to receive a verification code"
                 : "Enter your phone number to get started"}
             </p>
 
             <div className="space-y-4">
-            <input
+              <input
                 type="tel"
                 placeholder="Phone Number* (10 digits)"
                 value={phone}
@@ -731,7 +672,7 @@ const AuthPage = () => {
                 required
                 disabled={loading}
                 className="w-full border-2 border-blue-400 rounded-lg px-4 py-3 focus:outline-none focus:ring-1 focus:ring-blue-200 text-base placeholder-gray-500"
-                maxLength={12} // 10 digits + 1 space (XXXXX XXXXX)
+                maxLength={12}
               />
               {mode === "register" && (
                 <input
@@ -756,15 +697,10 @@ const AuthPage = () => {
           </>
         )}
 
-        {/* Verification Code Step */}
         {step === "code" && (
           <>
-            <h2 className="text-2xl font-normal mb-2 text-center">
-              Enter Verification Code
-            </h2>
-            <p className="text-gray-700 text-center mb-6 text-base font-normal">
-              We sent a 6-digit code to {phone}
-            </p>
+            <h2 className="text-2xl font-normal mb-2 text-center">Enter Verification Code</h2>
+            <p className="text-gray-700 text-center mb-6 text-base font-normal">We sent a 6-digit code to {phone}</p>
 
             <div className="space-y-4">
               <input
@@ -787,21 +723,12 @@ const AuthPage = () => {
               </button>
 
               <div className="text-center">
-                <button
-                  onClick={resendCode}
-                  disabled={!canResend || loading}
-                  className="text-blue-600 hover:text-blue-800 disabled:text-gray-400"
-                >
+                <button onClick={resendCode} disabled={!canResend || loading} className="text-blue-600 hover:text-blue-800 disabled:text-gray-400">
                   {canResend ? "Resend Code" : `Resend in ${countdown}s`}
                 </button>
               </div>
 
-              <button
-                onClick={resetFlow}
-                className="w-full text-gray-600 hover:text-gray-800 py-2"
-              >
-                ← Change phone number
-              </button>
+              <button onClick={resetFlow} className="w-full text-gray-600 hover:text-gray-800 py-2">← Change phone number</button>
             </div>
           </>
         )}
@@ -809,18 +736,9 @@ const AuthPage = () => {
         {msg && <div className="text-green-600 text-center mt-4 text-sm">{msg}</div>}
         {error && <div className="text-red-600 text-center mt-4 text-sm">{error}</div>}
 
-        {/* Switch between login/register */}
         {step === "phone" && (
           <div className="flex justify-between mt-6 text-xs text-gray-500">
-            <button
-              className="hover:underline"
-              onClick={() => {
-                setMode(mode === "login" ? "register" : "login");
-                setError("");
-                setMsg("");
-              }}
-              type="button"
-            >
+            <button className="hover:underline" onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(""); setMsg(""); }} type="button">
               {mode === "login" ? "Create Account" : "Sign in"}
             </button>
             <div>
