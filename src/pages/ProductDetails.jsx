@@ -1040,7 +1040,57 @@ const ProductDetails = () => {
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-10">
-            {/* suggested products rendering (unchanged) */}
+             {suggestedLoading ? (
+              // skeletons while loading
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-44 bg-gray-200 animate-pulse rounded" />
+              ))
+            ) : suggestedError ? (
+              <div className="col-span-2 lg:col-span-4 text-center text-red-600">
+                {suggestedError}
+              </div>
+            ) : suggestedProducts.length === 0 ? (
+              // fallback UI if none found
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="group cursor-pointer">
+                  <div className="overflow-hidden mb-4 aspect-[4/5] relative bg-white">
+                    <img src={FALLBACK_IMAGE} className="w-full h-full object-cover" alt={`also-${i}`} />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-xs font-medium text-gray-900 tracking-wide">PRODUCT NAME</h3>
+                    <p className="text-xs text-gray-600">RS. 3,995</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              // render suggested products fetched from backend
+              suggestedProducts.map((p) => {
+                const isSuggestedOutOfStock = p.stock === 0 || !p.is_in_stock;
+                return (
+                  <div key={p.id ?? p.pk ?? Math.random()} className="group cursor-pointer relative" onClick={() => {
+                    const pid = p.id ?? p.pk;
+                    if (pid) navigate(`/productdetails/${pid}`);
+                  }}>
+                    {/* Out of Stock Overlay */}
+                    {isSuggestedOutOfStock && (
+                      <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center z-10">
+                        <span className="text-white text-xs font-bold bg-red-600 px-2 py-1 rounded">OUT OF STOCK</span>
+                      </div>
+                    )}
+                    <div className="overflow-hidden mb-4 aspect-[4/5] relative bg-white">
+                      <img src={p._image || FALLBACK_IMAGE} className="w-full h-full object-cover" alt={p.name || "product"} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMAGE; }} />
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-xs font-medium text-gray-900 tracking-wide">{p.name || "Product"}</h3>
+                      <p className="text-xs text-gray-600">{p.discounted_price ?? p.price_display ?? ""}</p>
+                      {isSuggestedOutOfStock && (
+                        <p className="text-xs text-red-600 font-medium">Out of Stock</p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </div>
