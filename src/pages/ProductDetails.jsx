@@ -630,7 +630,6 @@
 
 
 
-
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { getCSRFToken } from '../context/authUtils.js';
@@ -641,6 +640,7 @@ import FALLBACK_IMG from "../assets/logo.png";
 const API_BASE =
   (typeof window !== "undefined" && window.__API_BASE__) || "https://api.elfamor.com";
 
+// Normalize image URL (handles absolute, protocol-relative and relative paths)
 function normalizeImageUrl(url) {
   if (!url) return null;
   if (/^https?:\/\//i.test(url)) return url;
@@ -649,7 +649,7 @@ function normalizeImageUrl(url) {
   return `${API_BASE.replace(/\/$/, "")}/${url}`;
 }
 
-// Guest cart key
+// Guest cart key (versioned)
 const GUEST_CART_KEY = "guest_cart_v1";
 
 function loadGuestCart() {
@@ -700,6 +700,7 @@ const ProductDetails = () => {
   const location = useLocation();
   const { user } = useAuth();
 
+  // Product state
   const [product, setProduct] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -707,9 +708,22 @@ const ProductDetails = () => {
   const [error, setError] = useState("");
   const [itemActionLoading, setItemActionLoading] = useState(false);
 
+  // Suggested products state
+  const [suggestedProducts, setSuggestedProducts] = useState([]);
+  const [suggestedLoading, setSuggestedLoading] = useState(true);
+  const [suggestedError, setSuggestedError] = useState("");
+
   const prevQtyRef = useRef(0);
+  const isMounted = useRef(true);
 
   useEffect(() => {
+    return () => { isMounted.current = false; };
+  }, []);
+
+  // Fetch single product
+  useEffect(() => {
+    if (!id) return;
+
     const controller = new AbortController();
     const signal = controller.signal;
 
@@ -723,9 +737,10 @@ const ProductDetails = () => {
           headers: { Accept: "application/json" },
           signal,
         });
-        if (!res.ok) throw new Error(`Failed to fetch product ${res.status}`);
+        if (!res.ok) throw new Error(`Failed to fetch product (${res.status})`);
         const productData = await res.json();
 
+        // If images not present, try separate image endpoint (best-effort)
         if (!productData.images || productData.images.length === 0) {
           try {
             const imagesRes = await fetch(`${API_BASE}/api/product-images/?product_id=${id}`, {
@@ -739,32 +754,146 @@ const ProductDetails = () => {
               productData.images = imagesData.results || imagesData || [];
             }
           } catch (imgErr) {
+            // do not fail entire load just because images endpoint failed
             console.warn("product images fetch failed:", imgErr);
           }
         }
 
-        if (!signal.aborted) {
+        if (!signal.aborted && isMounted.current) {
           setProduct(productData);
           setCurrentImageIndex(0);
           if (productData.stock === 0) setQuantity(0);
           else setQuantity(Math.min(1, productData.stock || 1));
         }
       } catch (err) {
-        if (!signal.aborted) setError(err.message || "Failed to fetch product");
+        if (!signal.aborted && isMounted.current) {
+          console.error("fetchProduct error", err);
+          setError(err.message || "Failed to fetch product");
+        }
       } finally {
-        if (!signal.aborted) setLoading(false);
+        if (!signal.aborted && isMounted.current) setLoading(false);
       }
     };
 
-    if (id) fetchProduct();
+    fetchProduct();
     return () => controller.abort();
   }, [id]);
 
-  // safe guards for product possibly being null
+  // Fetch suggested products (attempt multiple endpoints, pick random)
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    const endpoints = [
+      `${API_BASE}/api/products/products/`,
+      // you can add alternate endpoints if your backend exposes them
+      // `${API_BASE}/api/products/`,
+      // `${API_BASE}/products/`
+    ];
+
+    const fetchEndpoint = async (ep) => {
+      const res = await fetch(ep, {
+        method: "GET",
+        credentials: "include",
+        headers: { Accept: "application/json" },
+        signal,
+      });
+      if (!res.ok) {
+        const txt = await res.text().catch(() => "");
+        throw new Error(`${res.status} ${res.statusText} from ${ep} — ${txt.slice(0, 200)}`);
+      }
+      let data;
+      try {
+        data = await res.json();
+      } catch (err) {
+        const txt = await res.text().catch(() => "");
+        throw new Error(`Invalid JSON from ${ep}: ${txt.slice(0, 300)}`);
+      }
+      return Array.isArray(data) ? data : data.results || [];
+    };
+
+    const pickRandom = (arr, n = 4) => {
+      if (!Array.isArray(arr) || arr.length === 0) return [];
+      const inStockProducts = arr.filter(p => p?.stock > 0 || p?.is_in_stock);
+      const source = inStockProducts.length > 0 ? inStockProducts : arr;
+      const a = source.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a.slice(0, n);
+    };
+
+    const deriveProductImage = (p) => {
+      if (!p) return FALLBACK_IMG;
+      if (p.primary_image) {
+        if (typeof p.primary_image === "string") return normalizeImageUrl(p.primary_image) || FALLBACK_IMG;
+        if (p.primary_image.url) return normalizeImageUrl(p.primary_image.url) || FALLBACK_IMG;
+        if (p.primary_image.image) return normalizeImageUrl(p.primary_image.image) || FALLBACK_IMG;
+      }
+      if (Array.isArray(p.images) && p.images.length > 0) {
+        const primary = p.images.find((i) => i.is_primary) || p.images[0];
+        if (typeof primary === "string") return normalizeImageUrl(primary) || FALLBACK_IMG;
+        const raw = primary.image || primary.url || primary.image_url || primary.path || primary.file;
+        return normalizeImageUrl(raw) || FALLBACK_IMG;
+      }
+      if (p.image) return normalizeImageUrl(p.image) || FALLBACK_IMG;
+      if (p.main_image) return normalizeImageUrl(p.main_image) || FALLBACK_IMG;
+      if (p.image_url) return normalizeImageUrl(p.image_url) || FALLBACK_IMG;
+      return FALLBACK_IMG;
+    };
+
+    const fetchSuggested = async () => {
+      setSuggestedLoading(true);
+      setSuggestedError("");
+      setSuggestedProducts([]);
+      let lastErr = null;
+      const tries = endpoints.map((ep) => fetchEndpoint(ep).catch((e) => { throw e; }));
+      try {
+        const items = await Promise.any(tries);
+        const picked = pickRandom(items, 4).map((p) => ({ ...p, _image: deriveProductImage(p) }));
+        if (!signal.aborted && isMounted.current) {
+          setSuggestedProducts(picked);
+          setSuggestedLoading(false);
+        }
+      } catch (err) {
+        // fallback sequential attempt
+        try {
+          for (const ep of endpoints) {
+            try {
+              const items = await fetchEndpoint(ep);
+              const picked = pickRandom(items, 4).map((p) => ({ ...p, _image: deriveProductImage(p) }));
+              if (!signal.aborted && isMounted.current) {
+                setSuggestedProducts(picked);
+                setSuggestedLoading(false);
+              }
+              return;
+            } catch (e) {
+              lastErr = e;
+              continue;
+            }
+          }
+          throw lastErr || new Error("No product endpoints returned data");
+        } catch (finalErr) {
+          if (!signal.aborted && isMounted.current) {
+            console.error("Suggested products fetch failed:", finalErr);
+            setSuggestedError(finalErr.message || "Failed to fetch suggested products");
+            setSuggestedLoading(false);
+            setSuggestedProducts([]);
+          }
+        }
+      }
+    };
+
+    fetchSuggested();
+    return () => controller.abort();
+  }, []);
+
+  // safe guards
   const isOutOfStock = !!product && (product.stock === 0 || !product.is_in_stock);
 
-  const price1 = product ? Number(product.price) : 0;
-  const discounted = product ? Number(product.discounted_price) : 0;
+  const price1 = product ? Number(product.price || 0) : 0;
+  const discounted = product ? Number(product.discounted_price || 0) : 0;
   const discountPercentage =
     price1 > 0 && discounted > 0 && discounted < price1
       ? Math.round(((price1 - discounted) / price1) * 100)
@@ -780,20 +909,19 @@ const ProductDetails = () => {
     setQuantity((q) => Math.max(1, q - 1));
   };
 
+  // Add to cart handler (guest: localStorage; logged-in: backend)
   const handleAddToCart = () => {
     if (isOutOfStock) {
       toast.error("This product is currently out of stock");
       return;
     }
 
-    // Guest flow: save to localStorage and allow viewing cart
     if (!user) {
       addToGuestCartItem(product, quantity);
       toast.success(`Added ${quantity} x ${product?.name || "product"} to cart (saved for when you sign in)`);
       return;
     }
 
-    // Logged-in flow: call backend add endpoint
     (async () => {
       try {
         setItemActionLoading(true);
@@ -810,10 +938,10 @@ const ProductDetails = () => {
         });
 
         if (res.ok) {
-          const data = await res.json();
+          await res.json().catch(() => null);
           toast.success(`Added ${quantity} x ${product.name} to cart`);
         } else if (res.status === 401) {
-          // unexpected: send user to auth preserving intent to checkout
+          // Shouldn't normally happen when user is truthy, but handle gracefully
           navigate('/auth', { state: { from: location, next: '/checkout', alert: 'please sign in/sign up first to proceed further' } });
         } else {
           const err = await res.json().catch(() => null);
@@ -828,14 +956,15 @@ const ProductDetails = () => {
     })();
   };
 
+  // Thumbnail source helper (works with either image object or url string)
   const thumbSrc = (imgObj) => {
     if (!imgObj) return FALLBACK_IMG;
+    if (typeof imgObj === "string") return normalizeImageUrl(imgObj) || FALLBACK_IMG;
     const raw = imgObj.image_url || imgObj.image || imgObj.url || imgObj.path || imgObj.file || imgObj.media;
     return normalizeImageUrl(raw) || FALLBACK_IMG;
   };
 
   const getDisplayedSrc = () => {
-    // return fallback while product not loaded yet
     if (!product) return FALLBACK_IMG;
 
     if (Array.isArray(product.images) && product.images.length > 0) {
@@ -854,20 +983,20 @@ const ProductDetails = () => {
     return normalizeImageUrl(raw) || FALLBACK_IMG;
   };
 
-  // imgs: safe array for thumbnails; if product not loaded, use empty array
   const imgs = (product && Array.isArray(product.images) && product.images.length > 0)
     ? product.images
     : (product ? [{ id: "primary", image_url: product.primary_image?.url || product.primary_image || product.image || product.image_url || product.main_image }] : []);
 
   const displayed = getDisplayedSrc();
 
+  const navigateToAllProducts = () => navigate("/products");
+
+  // Render guards: invalid id, loading, error, not found
   if (!id) {
     return (
       <div className="min-h-screen bg-[#EFEFEF] p-6">
         <div className="text-red-600 mb-4">Invalid product URL (missing id).</div>
-        <button onClick={() => navigate("/products")} className="px-3 py-2 bg-black text-white rounded">
-          Back to products
-        </button>
+        <button onClick={navigateToAllProducts} className="px-3 py-2 bg-black text-white rounded">Back to products</button>
       </div>
     );
   }
@@ -884,21 +1013,17 @@ const ProductDetails = () => {
     return (
       <div className="min-h-screen bg-[#EFEFEF] p-6">
         <div className="text-red-600 mb-4">Error: {error}</div>
-        <button onClick={() => navigate("/products")} className="px-3 py-2 bg-black text-white rounded">
-          Back to products
-        </button>
+        <button onClick={navigateToAllProducts} className="px-3 py-2 bg-black text-white rounded">Back to products</button>
       </div>
     );
   }
 
   if (!product) {
-    // defensive: product still null after loading -> show fallback
+    // defensive fallback if product still null
     return (
       <div className="min-h-screen bg-[#EFEFEF] p-6">
         <div>No product found.</div>
-        <button onClick={() => navigate("/products")} className="mt-4 px-3 py-2 bg-black text-white rounded">
-          Back to products
-        </button>
+        <button onClick={navigateToAllProducts} className="mt-4 px-3 py-2 bg-black text-white rounded">Back to products</button>
       </div>
     );
   }
@@ -907,6 +1032,8 @@ const ProductDetails = () => {
     <div className="min-h-screen bg-[#efefef] text-sm lg:py-12 mt-21">
       <div className="px-2 xl:px-6">
         <div className="grid grid-cols-1 lg:grid-cols-[80px_1fr_1fr] gap-6 xl:gap-0 items-start">
+
+          {/* Thumbnails */}
           <div className="order-2 lg:order-1">
             <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-visible py-2">
               {imgs.length > 0 ? imgs.map((imgObj, idx) => (
@@ -921,14 +1048,10 @@ const ProductDetails = () => {
                     className="w-full h-full object-cover"
                     loading="lazy"
                     decoding="async"
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = FALLBACK_IMG;
-                    }}
+                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMG; }}
                   />
                 </button>
               )) : (
-                // show a single fallback thumbnail if no images yet
                 <div className="flex-shrink-0 w-20 h-20 p-1 rounded-md overflow-hidden border border-gray-200">
                   <img src={FALLBACK_IMG} alt="thumb-fallback" className="w-full h-full object-cover" />
                 </div>
@@ -936,6 +1059,7 @@ const ProductDetails = () => {
             </div>
           </div>
 
+          {/* Main image */}
           <div className="order-1 lg:order-2 flex justify-center items-center">
             <div className="w-full max-h-[80vh] flex items-center justify-center bg-[#efefef] py-4 rounded">
               <img
@@ -944,14 +1068,12 @@ const ProductDetails = () => {
                 className="max-h-[80vh] max-w-full object-contain"
                 loading="lazy"
                 decoding="async"
-                onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.src = FALLBACK_IMG;
-                }}
+                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMG; }}
               />
             </div>
           </div>
 
+          {/* Details */}
           <div className="order-3 lg:order-3">
             <div className="space-y-4 px-2 py-4 lg:p-6 bg-[#efefef] rounded">
               <div className="flex items-start justify-between">
@@ -962,6 +1084,7 @@ const ProductDetails = () => {
                     {isOutOfStock ? '🛒 Out of Stock' : product.stock_status || (product.stock <= 10 ? `⚠️ Low Stock (${product.stock} remaining)` : '✅ In Stock')}
                   </div>
                 </div>
+
                 <div className="mt-1 text-right">
                   {discounted > 0 && discounted < price1 ? (
                     <div className="space-y-1">
@@ -1033,59 +1156,61 @@ const ProductDetails = () => {
           </div>
         </div>
 
+        {/* Suggested products */}
         <div className="bg-[#EFEFEF] py-6 mt-8 rounded">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xs text-gray-700">YOU MAY ALSO LIKE</h2>
-            <button onClick={() => navigate("/products")} className="text-xs bg-white font-medium text-gray-700 p-1 px-2">DISCOVER MORE</button>
+            <button onClick={navigateToAllProducts} className="text-xs bg-white font-medium text-gray-700 p-1 px-2">DISCOVER MORE</button>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-10">
-             {suggestedLoading ? (
-              // skeletons while loading
+            {suggestedLoading ? (
               Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="h-44 bg-gray-200 animate-pulse rounded" />
               ))
             ) : suggestedError ? (
-              <div className="col-span-2 lg:col-span-4 text-center text-red-600">
-                {suggestedError}
-              </div>
+              <div className="col-span-2 lg:col-span-4 text-center text-red-600">{suggestedError}</div>
             ) : suggestedProducts.length === 0 ? (
-              // fallback UI if none found
               Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="group cursor-pointer">
                   <div className="overflow-hidden mb-4 aspect-[4/5] relative bg-white">
-                    <img src={FALLBACK_IMAGE} className="w-full h-full object-cover" alt={`also-${i}`} />
+                    <img src={FALLBACK_IMG} className="w-full h-full object-cover" alt={`also-${i}`} />
                   </div>
                   <div className="space-y-1">
                     <h3 className="text-xs font-medium text-gray-900 tracking-wide">PRODUCT NAME</h3>
-                    <p className="text-xs text-gray-600">RS. 3,995</p>
+                    <p className="text-xs text-gray-600">₹ 3,995</p>
                   </div>
                 </div>
               ))
             ) : (
-              // render suggested products fetched from backend
               suggestedProducts.map((p) => {
-                const isSuggestedOutOfStock = p.stock === 0 || !p.is_in_stock;
+                const pid = p.id ?? p.pk;
+                const isSuggestedOutOfStock = (p.stock === 0 || !p.is_in_stock);
                 return (
-                  <div key={p.id ?? p.pk ?? Math.random()} className="group cursor-pointer relative" onClick={() => {
-                    const pid = p.id ?? p.pk;
-                    if (pid) navigate(`/productdetails/${pid}`);
-                  }}>
-                    {/* Out of Stock Overlay */}
+                  <div
+                    key={pid ?? Math.random()}
+                    className="group cursor-pointer relative"
+                    onClick={() => { if (pid) navigate(`/productdetails/${pid}`); }}
+                  >
                     {isSuggestedOutOfStock && (
                       <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center z-10">
                         <span className="text-white text-xs font-bold bg-red-600 px-2 py-1 rounded">OUT OF STOCK</span>
                       </div>
                     )}
+
                     <div className="overflow-hidden mb-4 aspect-[4/5] relative bg-white">
-                      <img src={p._image || FALLBACK_IMAGE} className="w-full h-full object-cover" alt={p.name || "product"} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMAGE; }} />
+                      <img
+                        src={p._image || FALLBACK_IMG}
+                        className="w-full h-full object-cover"
+                        alt={p.name || "product"}
+                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMG; }}
+                      />
                     </div>
+
                     <div className="space-y-1">
                       <h3 className="text-xs font-medium text-gray-900 tracking-wide">{p.name || "Product"}</h3>
-                      <p className="text-xs text-gray-600">{p.discounted_price ?? p.price_display ?? ""}</p>
-                      {isSuggestedOutOfStock && (
-                        <p className="text-xs text-red-600 font-medium">Out of Stock</p>
-                      )}
+                      <p className="text-xs text-gray-600">{p.discounted_price ?? p.price ?? ""}</p>
+                      {isSuggestedOutOfStock && <p className="text-xs text-red-600 font-medium">Out of Stock</p>}
                     </div>
                   </div>
                 );
