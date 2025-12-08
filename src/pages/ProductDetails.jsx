@@ -692,6 +692,8 @@ function addToGuestCartItem(productObj, qty) {
     });
   }
   saveGuestCart(items);
+  // notify navbar (same-tab) and other listeners that guest cart changed
+window.dispatchEvent(new Event('guest_cart_updated'));
 }
 
 const ProductDetails = () => {
