@@ -693,7 +693,7 @@ function addToGuestCartItem(productObj, qty) {
   }
   saveGuestCart(items);
   // notify navbar (same-tab) and other listeners that guest cart changed
-  window.dispatchEvent(new Event('guest_cart_updated'));
+window.dispatchEvent(new Event('guest_cart_updated'));
 }
 
 const ProductDetails = () => {
@@ -707,7 +707,6 @@ const ProductDetails = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(Boolean(id));
-  const [showLoader, setShowLoader] = useState(false); // show loader only after delay
   const [error, setError] = useState("");
   const [itemActionLoading, setItemActionLoading] = useState(false);
 
@@ -718,7 +717,6 @@ const ProductDetails = () => {
 
   const prevQtyRef = useRef(0);
   const isMounted = useRef(true);
-  const loaderTimeoutRef = useRef(null);
 
   useEffect(() => {
     return () => { isMounted.current = false; };
@@ -732,13 +730,6 @@ const ProductDetails = () => {
     const signal = controller.signal;
 
     const fetchProduct = async () => {
-      // start loader delay timer (only show if fetch is slow)
-      if (loaderTimeoutRef.current) clearTimeout(loaderTimeoutRef.current);
-      setShowLoader(false);
-      loaderTimeoutRef.current = setTimeout(() => {
-        if (isMounted.current) setShowLoader(true);
-      }, 500); // 500ms delay before showing loader
-
       setLoading(true);
       setError("");
       try {
@@ -782,26 +773,12 @@ const ProductDetails = () => {
           setError(err.message || "Failed to fetch product");
         }
       } finally {
-        if (!signal.aborted && isMounted.current) {
-          setLoading(false);
-          // clear loader timer and hide loader
-          if (loaderTimeoutRef.current) {
-            clearTimeout(loaderTimeoutRef.current);
-            loaderTimeoutRef.current = null;
-          }
-          setShowLoader(false);
-        }
+        if (!signal.aborted && isMounted.current) setLoading(false);
       }
     };
 
     fetchProduct();
-    return () => {
-      controller.abort();
-      if (loaderTimeoutRef.current) {
-        clearTimeout(loaderTimeoutRef.current);
-        loaderTimeoutRef.current = null;
-      }
-    };
+    return () => controller.abort();
   }, [id]);
 
   // Fetch suggested products (attempt multiple endpoints, pick random)
@@ -1016,7 +993,7 @@ const ProductDetails = () => {
 
   const navigateToAllProducts = () => navigate("/products");
 
-  // Render guards: invalid id, loading (delayed), error, not found
+  // Render guards: invalid id, loading, error, not found
   if (!id) {
     return (
       <div className="min-h-screen bg-[#EFEFEF] p-6">
@@ -1026,8 +1003,7 @@ const ProductDetails = () => {
     );
   }
 
-  // show loader only if fetch is slow (showLoader true)
-  if (loading && showLoader) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-[#EFEFEF] p-4 flex justify-center items-center">
         <div className="animate-pulse">Loading product…</div>
@@ -1044,19 +1020,14 @@ const ProductDetails = () => {
     );
   }
 
-  // only show "No product found" when not loading and product is null
-  if (!product && !loading) {
+  if (!product) {
+    // defensive fallback if product still null
     return (
       <div className="min-h-screen bg-[#EFEFEF] p-6">
         <div>No product found.</div>
         <button onClick={navigateToAllProducts} className="mt-4 px-3 py-2 bg-black text-white rounded">Back to products</button>
       </div>
     );
-  }
-
-  // while loading but showLoader is false, render nothing (prevents quick flash)
-  if (loading && !showLoader) {
-    return null;
   }
 
   return (
