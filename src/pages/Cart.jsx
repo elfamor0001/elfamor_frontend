@@ -657,7 +657,7 @@ const Cart = () => {
 
     if (!user) {
       // redirect to auth and include next: '/checkout' so after login user ends on checkout
-      navigate('/auth', { state: { from: location, next: '/checkout', alert: 'please sign in/sign up first to proceed further' } });
+      navigate('/auth', { state: { from: location, next: '/checkout', alert: 'Please sign in/sign up first to proceed further' } });
       return;
     }
 

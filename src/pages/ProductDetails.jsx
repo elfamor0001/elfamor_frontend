@@ -942,7 +942,7 @@ const ProductDetails = () => {
           toast.success(`Added ${quantity} x ${product.name} to cart`);
         } else if (res.status === 401) {
           // Shouldn't normally happen when user is truthy, but handle gracefully
-          navigate('/auth', { state: { from: location, next: '/checkout', alert: 'please sign in/sign up first to proceed further' } });
+          navigate('/auth', { state: { from: location, next: '/checkout', alert: 'Please sign in/sign up first to proceed further' } });
         } else {
           const err = await res.json().catch(() => null);
           toast.error((err && err.error) || "Failed to add item to cart");

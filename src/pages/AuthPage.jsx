@@ -655,7 +655,7 @@ const AuthPage = () => {
         {step === "phone" && (
           <>
             <h2 className="text-2xl font-normal mb-2 text-center">
-              {mode === "login" ? "Sign in with Phone" : "Create Account"}
+              {mode === "login" ? "Sign in with Phone" : "Are you a new user? Register"}
             </h2>
             <p className="text-gray-700 text-center mb-6 text-base font-normal">
               {mode === "login"
@@ -739,7 +739,7 @@ const AuthPage = () => {
         {step === "phone" && (
           <div className="flex justify-between mt-6 text-xs text-gray-500">
             <button className="hover:underline" onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(""); setMsg(""); }} type="button">
-              {mode === "login" ? "Create Account" : "Sign in"}
+              {mode === "login" ? "Are you a new user? Register" : "Sign in"}
             </button>
             <div>
               <a href="/privacy-policy" className="hover:underline mr-2">Privacy</a>
