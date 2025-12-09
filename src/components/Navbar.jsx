@@ -1067,7 +1067,7 @@ export const Navbar = ({ currentPage, setCurrentPage }) => {
                 </button>
 
                 {dynamicCartCount > 0 && (
-                  <span className="absolute -top-2 right-2 z-10 bg-black text-white text-[10px] font-semibold px-[5px] py-[1px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center">
+                  <span className="absolute -top-2 right-8 z-10 bg-black text-white text-[10px] font-semibold px-[5px] py-[1px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center">
                     {dynamicCartCount > 99 ? '99+' : dynamicCartCount}
                   </span>
                 )}
