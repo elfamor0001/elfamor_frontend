@@ -1061,13 +1061,13 @@ export const Navbar = ({ currentPage, setCurrentPage }) => {
               <div className="relative">
                 <button
                   onClick={navigateToCart}
-                  className="bg-gray-900 text-white p-2 transition-colors duration-300 animate-revolve icon-3d hover:cursor-pointer relative z-10 -ml-10"
+                  className="bg-gray-900 text-white p-2 transition-colors duration-300 animate-revolve icon-3d hover:cursor-pointer relative z-10"
                 >
                   <ShoppingBag size={16} />
                 </button>
 
                 {dynamicCartCount > 0 && (
-                  <span className="absolute -top-2 right-8 z-10 bg-black text-white text-[10px] font-semibold px-[5px] py-[1px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center">
+                  <span className="absolute -top-2 right-2 z-10 bg-black text-white text-[10px] font-semibold px-[5px] py-[1px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center">
                     {dynamicCartCount > 99 ? '99+' : dynamicCartCount}
                   </span>
                 )}
