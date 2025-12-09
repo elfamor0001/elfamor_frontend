@@ -970,7 +970,7 @@ export const Navbar = ({ currentPage, setCurrentPage }) => {
                         ))
                       ) : (
                         <div className="px-4 py-2 text-xs text-gray-500">
-                          No products found. Check console for details.
+                          No products found.
                         </div>
                       )}
                     </div>
@@ -1061,7 +1061,7 @@ export const Navbar = ({ currentPage, setCurrentPage }) => {
               <div className="relative">
                 <button
                   onClick={navigateToCart}
-                  className="bg-gray-900 text-white p-2 transition-colors duration-300 animate-revolve icon-3d hover:cursor-pointer relative z-10"
+                  className="bg-gray-900 text-white p-2 transition-colors duration-300 animate-revolve icon-3d hover:cursor-pointer relative z-10 -ml-10"
                 >
                   <ShoppingBag size={16} />
                 </button>
