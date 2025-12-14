@@ -76,36 +76,11 @@
 // export default App;
 
 
-import React, { useState } from 'react';
-import Navbar from './components/Navbar.jsx';
-import Footer from './components/Footer.jsx';
-import { Route, Routes } from 'react-router-dom';
-import AllProducts from './pages/AllProducts.jsx';
-import Home from './pages/Home.jsx';
-import ProductDetails from './pages/ProductDetails.jsx';
-import Cart from './pages/Cart.jsx';
-import RefundPolicy from './pages/RefundPolicy.jsx';
-import AuthPage from './pages/AuthPage.jsx';
-import ContactUs from './pages/ContactUs.jsx';
-import Terms from './pages/Terms.jsx';
-import Shipping from './pages/Shipping.jsx';
-import AboutUs from './pages/AboutUs.jsx';
-import OrderHistoryPage from './pages/OrderHistoryPage.jsx';
-import OrderSuccessPage from './pages/OrderSuccessPage.jsx';
-import CheckoutPage from './pages/CheckoutPage.jsx';
-import OrderDetailPage from './pages/OrderDetailPage.jsx';
-import PrivacyPolicy from './pages/PrivacyPolicy.jsx';
-import ScrollToTop from './components/ScrollToTop.js';
-import ProtectedRoute from './components/ProtectedRoute.jsx';
-import UnderMaintenance from './components/UnderMaintenance.jsx';
+import React from "react";
+import UnderMaintenance from "./components/UnderMaintenance.jsx";
 
 const App = () => {
-
-  return (
-    <>
-    <UnderMaintenance/>
-    </>
-  );
+  return <UnderMaintenance />;
 };
 
 export default App;
