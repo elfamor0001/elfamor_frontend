@@ -100,66 +100,10 @@ import ProtectedRoute from './components/ProtectedRoute.jsx';
 import UnderMaintenance from './components/UnderMaintenance.jsx';
 
 const App = () => {
-  // const [currentPage, setCurrentPage] = useState('home');
 
   return (
     <>
     <UnderMaintenance/>
-      {/* <ScrollToTop />
-      <Navbar currentPage={currentPage} setCurrentPage={setCurrentPage} />
-
-      <Routes>
-        <Route path='/' element={<Home />} />
-        <Route path='/products' element={<AllProducts />} />
-        <Route path='/productdetails/:id' element={<ProductDetails />} /> */}
-
-        {/* Public Cart */}
-        {/* <Route path='/cart' element={<Cart />} /> */}
-
-        {/* Protected Routes */}
-        {/* <Route
-          path='/orders'
-          element={
-            <ProtectedRoute>
-              <OrderHistoryPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path='/checkout'
-          element={
-            <ProtectedRoute>
-              <CheckoutPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path='/orders/:orderId'
-          element={
-            <ProtectedRoute>
-              <OrderDetailPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path='/order-success'
-          element={
-            <ProtectedRoute>
-              <OrderSuccessPage />
-            </ProtectedRoute>
-          }
-        /> */}
-
-        {/* Public Pages */}
-        {/* <Route path='/refund-policy' element={<RefundPolicy />} />
-        <Route path='/auth' element={<AuthPage />} />
-        <Route path='/contact-us' element={<ContactUs />} />
-        <Route path='/terms' element={<Terms />} />
-        <Route path='/shipping-policy' element={<Shipping />} />
-        <Route path='/about' element={<AboutUs />} />
-        <Route path='/privacy-policy' element={<PrivacyPolicy />} />
-      </Routes>
-      <Footer /> */}
     </>
   );
 };
