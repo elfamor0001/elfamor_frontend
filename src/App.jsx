@@ -105,26 +105,22 @@ const isMaintenance = import.meta.env.VITE_MAINTENANCE === "true";
 const App = () => {
   const [currentPage, setCurrentPage] = useState('home');
 
-  // 🚧 Maintenance Mode
-  if (isMaintenance) {
-    return <UnderMaintenance />;
-  }
-
   return (
     <>
-      <ScrollToTop />
+    <UnderMaintenance/>
+      {/* <ScrollToTop />
       <Navbar currentPage={currentPage} setCurrentPage={setCurrentPage} />
 
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/products' element={<AllProducts />} />
-        <Route path='/productdetails/:id' element={<ProductDetails />} />
+        <Route path='/productdetails/:id' element={<ProductDetails />} /> */}
 
         {/* Public Cart */}
-        <Route path='/cart' element={<Cart />} />
+        {/* <Route path='/cart' element={<Cart />} /> */}
 
         {/* Protected Routes */}
-        <Route
+        {/* <Route
           path='/orders'
           element={
             <ProtectedRoute>
@@ -155,10 +151,10 @@ const App = () => {
               <OrderSuccessPage />
             </ProtectedRoute>
           }
-        />
+        /> */}
 
         {/* Public Pages */}
-        <Route path='/refund-policy' element={<RefundPolicy />} />
+        {/* <Route path='/refund-policy' element={<RefundPolicy />} />
         <Route path='/auth' element={<AuthPage />} />
         <Route path='/contact-us' element={<ContactUs />} />
         <Route path='/terms' element={<Terms />} />
@@ -166,7 +162,7 @@ const App = () => {
         <Route path='/about' element={<AboutUs />} />
         <Route path='/privacy-policy' element={<PrivacyPolicy />} />
       </Routes>
-      <Footer />
+      <Footer /> */}
     </>
   );
 };
