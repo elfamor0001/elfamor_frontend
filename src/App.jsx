@@ -26,24 +26,21 @@
 //   return (
 //     <>
 //       <ScrollToTop />
-//       {/* Navbar */}
 //       <Navbar currentPage={currentPage} setCurrentPage={setCurrentPage} />
 
 //       <Routes>
 //         <Route path='/' element={<Home/>} />
 //         <Route path='/products' element={<AllProducts/>} />
 //         <Route path='/productdetails/:id' element={<ProductDetails/>} />
-        
+
+//         {/* Cart is public so guest can add/view */}
+//         <Route path='/cart' element={<Cart />} />
+
 //         {/* Protected Routes */}
-//         <Route path='/cart' element={
-//           <ProtectedRoute>
-//             <Cart />
-//           </ProtectedRoute>
-//         }/>
 //         <Route path='/orders' element={
-//           // <ProtectedRoute>
+//           <ProtectedRoute>
 //             <OrderHistoryPage />
-//           // </ProtectedRoute>
+//           </ProtectedRoute>
 //         }/>
 //         <Route path='/checkout' element={
 //           <ProtectedRoute>
@@ -60,20 +57,17 @@
 //             <OrderSuccessPage />
 //           </ProtectedRoute>
 //         }/>
-        
+
 //         {/* Public Routes */}
 //         <Route path='/refund-policy' element={<RefundPolicy/>} />
-//         {/* <Route path='/faqs' element={<FAQs/>} /> */}
 //         <Route path='/auth' element={<AuthPage/>} />
 //         <Route path='/contact-us' element={<ContactUs/>} />
 //         <Route path='/terms' element={<Terms/>} />
 //         <Route path='/shipping-policy' element={<Shipping/>} />
 //         <Route path='/about' element={<AboutUs/>} />
 //         <Route path='/privacy-policy' element={<PrivacyPolicy/>} />
-//         <Route path='/checkout' element={<CheckoutPage/>} />
 //       </Routes>
-      
-//       {/* Footer */}
+
 //       <Footer />
 //     </>
 //   );
@@ -100,12 +94,21 @@ import OrderHistoryPage from './pages/OrderHistoryPage.jsx';
 import OrderSuccessPage from './pages/OrderSuccessPage.jsx';
 import CheckoutPage from './pages/CheckoutPage.jsx';
 import OrderDetailPage from './pages/OrderDetailPage.jsx';
+import PrivacyPolicy from './pages/PrivacyPolicy.jsx';
 import ScrollToTop from './components/ScrollToTop.js';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
-import PrivacyPolicy from './pages/PrivacyPolicy.jsx';
+import UnderMaintenance from './components/UnderMaintenance.jsx';
+
+// 🔧 Maintenance flag (Vite)
+const isMaintenance = import.meta.env.VITE_MAINTENANCE === "true";
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState('home');
+
+  // 🚧 Maintenance Mode
+  if (isMaintenance) {
+    return <UnderMaintenance />;
+  }
 
   return (
     <>
@@ -113,45 +116,56 @@ const App = () => {
       <Navbar currentPage={currentPage} setCurrentPage={setCurrentPage} />
 
       <Routes>
-        <Route path='/' element={<Home/>} />
-        <Route path='/products' element={<AllProducts/>} />
-        <Route path='/productdetails/:id' element={<ProductDetails/>} />
+        <Route path='/' element={<Home />} />
+        <Route path='/products' element={<AllProducts />} />
+        <Route path='/productdetails/:id' element={<ProductDetails />} />
 
-        {/* Cart is public so guest can add/view */}
+        {/* Public Cart */}
         <Route path='/cart' element={<Cart />} />
 
         {/* Protected Routes */}
-        <Route path='/orders' element={
-          <ProtectedRoute>
-            <OrderHistoryPage />
-          </ProtectedRoute>
-        }/>
-        <Route path='/checkout' element={
-          <ProtectedRoute>
-            <CheckoutPage />
-          </ProtectedRoute>
-        }/>
-        <Route path='/orders/:orderId' element={
-          <ProtectedRoute>
-            <OrderDetailPage />
-          </ProtectedRoute>
-        }/>
-        <Route path='/order-success' element={
-          <ProtectedRoute>
-            <OrderSuccessPage />
-          </ProtectedRoute>
-        }/>
+        <Route
+          path='/orders'
+          element={
+            <ProtectedRoute>
+              <OrderHistoryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/checkout'
+          element={
+            <ProtectedRoute>
+              <CheckoutPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/orders/:orderId'
+          element={
+            <ProtectedRoute>
+              <OrderDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/order-success'
+          element={
+            <ProtectedRoute>
+              <OrderSuccessPage />
+            </ProtectedRoute>
+          }
+        />
 
-        {/* Public Routes */}
-        <Route path='/refund-policy' element={<RefundPolicy/>} />
-        <Route path='/auth' element={<AuthPage/>} />
-        <Route path='/contact-us' element={<ContactUs/>} />
-        <Route path='/terms' element={<Terms/>} />
-        <Route path='/shipping-policy' element={<Shipping/>} />
-        <Route path='/about' element={<AboutUs/>} />
-        <Route path='/privacy-policy' element={<PrivacyPolicy/>} />
+        {/* Public Pages */}
+        <Route path='/refund-policy' element={<RefundPolicy />} />
+        <Route path='/auth' element={<AuthPage />} />
+        <Route path='/contact-us' element={<ContactUs />} />
+        <Route path='/terms' element={<Terms />} />
+        <Route path='/shipping-policy' element={<Shipping />} />
+        <Route path='/about' element={<AboutUs />} />
+        <Route path='/privacy-policy' element={<PrivacyPolicy />} />
       </Routes>
-
       <Footer />
     </>
   );
