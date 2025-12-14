@@ -99,11 +99,8 @@ import ScrollToTop from './components/ScrollToTop.js';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import UnderMaintenance from './components/UnderMaintenance.jsx';
 
-// 🔧 Maintenance flag (Vite)
-const isMaintenance = import.meta.env.VITE_MAINTENANCE === "true";
-
 const App = () => {
-  const [currentPage, setCurrentPage] = useState('home');
+  // const [currentPage, setCurrentPage] = useState('home');
 
   return (
     <>
