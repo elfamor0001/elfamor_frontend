@@ -1,8 +1,8 @@
 // import React, { useState, useEffect, useRef } from "react";
 // import { useAuth } from "../context/AuthContext.jsx";
 // import { useNavigate, useLocation } from "react-router-dom";
+// import API_BASE from "../config";
 
-// const API_BASE = "https://api.elfamor.com";
 
 // const getCSRFToken = async () => {
 //   const res = await fetch(`${API_BASE}/accounts/csrf/`, { credentials: "include" });
@@ -16,11 +16,10 @@
 //   const location = useLocation();
 //   const isMounted = useRef(true);
 
-//   const [mode, setMode] = useState("login");
 //   const [step, setStep] = useState("phone");
 //   const [phone, setPhone] = useState("");
 //   const [verificationCode, setVerificationCode] = useState("");
-//   const [email, setEmail] = useState("");
+//   // const [email, setEmail] = useState(""); // Removed email from auth flow
 //   const [loading, setLoading] = useState(false);
 //   const [msg, setMsg] = useState("");
 //   const [error, setError] = useState("");
@@ -39,13 +38,7 @@
 //   }, [countdown]);
 
 //   useEffect(() => {
-//     const hasVisited = sessionStorage.getItem('hasVisitedAuth');
-//     if (!hasVisited) {
-//       sessionStorage.setItem('hasVisitedAuth', 'true');
-//       window.location.reload();
-//     } else {
-//       setIsInitialLoad(false);
-//     }
+//     setIsInitialLoad(false);
 //   }, []);
 
 //   useEffect(() => {
@@ -99,11 +92,18 @@
 //     setLoading(true);
 //     setError("");
 //     setMsg("");
+//     setCanResend(false); // Disable resend while processing
 
 //     try {
 //       const csrfToken = await getCSRFToken();
 //       const endpoint = "/accounts/send-verification-code/";
-//       const res = await fetch(`${API_BASE}${endpoint}`, {
+
+//       // Create a timeout promise to prevent infinite hanging
+//       const timeoutPromise = new Promise((_, reject) => {
+//         setTimeout(() => reject(new Error("Request timed out")), 15000); // 15s timeout
+//       });
+
+//       const fetchPromise = fetch(`${API_BASE}${endpoint}`, {
 //         method: "POST",
 //         credentials: "include",
 //         headers: {
@@ -113,7 +113,18 @@
 //         body: JSON.stringify({ phone: phone.replace(/\s/g, '') }),
 //       });
 
-//       const data = await res.json();
+//       // Race against timeout
+//       const res = await Promise.race([fetchPromise, timeoutPromise]);
+
+//       let data;
+//       const contentType = res.headers.get("content-type");
+//       if (contentType && contentType.indexOf("application/json") !== -1) {
+//         data = await res.json();
+//       } else {
+//         const text = await res.text();
+//         console.error("Non-JSON response:", text);
+//         throw new Error(`Server returned ${res.status} ${res.statusText}. Check console for details.`);
+//       }
 //       if (!isMounted.current) return false;
 
 //       if (res.ok) {
@@ -124,10 +135,14 @@
 //         return true;
 //       } else {
 //         setError(data.error || "Failed to send verification code");
+//         setCanResend(true); // Re-enable if failed
 //         return false;
 //       }
 //     } catch (err) {
-//       setError("Network error. Please try again.");
+//       if (!isMounted.current) return false;
+//       console.error("Auth Error:", err);
+//       setError(err.message === "Request timed out" ? "Request timed out. Please check your connection." : "Network error. Please try again.");
+//       setCanResend(true); // Re-enable if failed
 //       return false;
 //     } finally {
 //       if (isMounted.current) setLoading(false);
@@ -146,7 +161,7 @@
 
 //     try {
 //       const csrfToken = await getCSRFToken();
-//       const endpoint = "/accounts/phone-login/";
+//       const endpoint = "/accounts/unified-login/";
 //       const res = await fetch(`${API_BASE}${endpoint}`, {
 //         method: "POST",
 //         credentials: "include",
@@ -174,51 +189,6 @@
 //         setError(data.error || "Invalid verification code");
 //       }
 //     } catch (err) {
-//       setError("Network error. Please try again.");
-//     } finally {
-//       if (isMounted.current) setLoading(false);
-//     }
-//   };
-
-//   const handleRegister = async () => {
-//     setLoading(true);
-//     setError("");
-//     setMsg("");
-
-//     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-//       setError("Invalid email format");
-//       setLoading(false);
-//       return;
-//     }
-
-//     try {
-//       const csrfToken = await getCSRFToken();
-//       const endpoint = "/accounts/register/";
-//       const res = await fetch(`${API_BASE}${endpoint}`, {
-//         method: "POST",
-//         credentials: "include",
-//         headers: {
-//           "Content-Type": "application/json",
-//           "X-CSRFToken": csrfToken,
-//         },
-//         body: JSON.stringify({
-//           email,
-//           phone: phone.replace(/\s/g, '')
-//         }),
-//       });
-
-//       const data = await res.json();
-//       if (!isMounted.current) return;
-
-//       if (res.ok) {
-//         setMsg("Registration successful! Verification code sent to your phone.");
-//         setStep("code");
-//         setCountdown(60);
-//         setCanResend(false);
-//       } else {
-//         setError(data.error || "Registration failed");
-//       }
-//     } catch {
 //       setError("Network error. Please try again.");
 //     } finally {
 //       if (isMounted.current) setLoading(false);
@@ -260,12 +230,10 @@
 //         {step === "phone" && (
 //           <>
 //             <h2 className="text-2xl font-normal mb-2 text-center">
-//               {mode === "login" ? "Sign in with Phone" : "Are you a new user? Register"}
+//               Welcome
 //             </h2>
 //             <p className="text-gray-700 text-center mb-6 text-base font-normal">
-//               {mode === "login"
-//                 ? "Enter your phone number to receive a verification code"
-//                 : "Enter your phone number to get started"}
+//               Enter your phone number to sign in or create an account
 //             </p>
 
 //             <div className="space-y-4">
@@ -279,24 +247,13 @@
 //                 className="w-full border-2 border-blue-400 rounded-lg px-4 py-3 focus:outline-none focus:ring-1 focus:ring-blue-200 text-base placeholder-gray-500"
 //                 maxLength={12}
 //               />
-//               {mode === "register" && (
-//                 <input
-//                   type="email"
-//                   placeholder="Email*"
-//                   value={email}
-//                   onChange={(e) => setEmail(e.target.value)}
-//                   required
-//                   disabled={loading}
-//                   className="w-full border-2 border-blue-400 rounded-lg px-4 py-3 focus:outline-none focus:ring-1 focus:ring-blue-200 text-base placeholder-gray-500"
-//                 />
-//               )}
 
 //               <button
-//                 onClick={mode === "login" ? requestVerificationCode : handleRegister}
-//                 disabled={loading || !validatePhone(phone) || (mode === "register" && !email)}
+//                 onClick={requestVerificationCode}
+//                 disabled={loading || !validatePhone(phone)}
 //                 className="w-full bg-black text-white rounded-xl py-4 font-semibold text-lg hover:bg-gray-900 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
 //               >
-//                 {loading ? "Sending..." : mode === "login" ? "Send Code" : "Register & Send Code"}
+//                 {loading ? "Sending..." : "Continue"}
 //               </button>
 //             </div>
 //           </>
@@ -341,17 +298,12 @@
 //         {msg && <div className="text-green-600 text-center mt-4 text-sm">{msg}</div>}
 //         {error && <div className="text-red-600 text-center mt-4 text-sm">{error}</div>}
 
-//         {step === "phone" && (
-//           <div className="flex justify-between mt-6 text-xs text-gray-500">
-//             <button className="hover:underline" onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(""); setMsg(""); }} type="button">
-//               {mode === "login" ? "Are you a new user? Register" : "Sign in"}
-//             </button>
-//             <div>
-//               <a href="/privacy-policy" className="hover:underline mr-2">Privacy</a>
-//               <a href="/terms" className="hover:underline">Terms</a>
-//             </div>
+//         <div className="flex justify-center mt-6 text-xs text-gray-500">
+//           <div>
+//             <a href="/privacy-policy" className="hover:underline mr-2">Privacy</a>
+//             <a href="/terms" className="hover:underline">Terms</a>
 //           </div>
-//         )}
+//         </div>
 //       </div>
 //     </div>
 //   );
@@ -360,10 +312,12 @@
 // export default AuthPage;
 
 
+
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useNavigate, useLocation } from "react-router-dom";
 import API_BASE from "../config";
+
 
 const getCSRFToken = async () => {
   const res = await fetch(`${API_BASE}/accounts/csrf/`, { credentials: "include" });
