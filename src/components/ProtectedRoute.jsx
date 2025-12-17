@@ -26,13 +26,15 @@ const ProtectedRoute = ({ children }) => {
   const location = useLocation();
   const toastShownRef = useRef(false);
 
-  // wait until auth state is known
-  if (user === undefined) return null;
+  // ⛔ WAIT for auth to resolve
+  if (user === undefined) {
+    return null; // or a loader if you want
+  }
 
-  if (!user) {
-    // 🔔 show toast ONLY ONCE
+  // ❌ NOT logged in
+  if (user === null) {
     if (!toastShownRef.current) {
-      toast.error('Please login first to see your orders');
+      toast.error('Please login to see your orders');
       toastShownRef.current = true;
     }
 
@@ -45,7 +47,9 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
+  // ✅ logged in — NO toast, NO redirect
   return children;
 };
 
 export default ProtectedRoute;
+
