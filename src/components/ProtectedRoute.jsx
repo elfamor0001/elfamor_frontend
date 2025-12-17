@@ -22,19 +22,19 @@ import { toast } from 'react-hot-toast';
 import { useRef } from 'react';
 
 const ProtectedRoute = ({ children }) => {
-  const { user } = useAuth();
+  const { user, authLoading } = useAuth();
   const location = useLocation();
   const toastShownRef = useRef(false);
 
-  // ⛔ WAIT for auth to resolve
-  if (user === undefined) {
-    return null; // or a loader if you want
+  // ⛔ WAIT until auth check finishes
+  if (authLoading) {
+    return null; // or loader if you want
   }
 
-  // ❌ NOT logged in
-  if (user === null) {
+  // ❌ user is definitely NOT logged in
+  if (!user) {
     if (!toastShownRef.current) {
-      toast.error('Please login to see your orders');
+      toast.error('Please login first to see your orders');
       toastShownRef.current = true;
     }
 
@@ -47,9 +47,8 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  // ✅ logged in — NO toast, NO redirect
+  // ✅ logged in
   return children;
 };
 
 export default ProtectedRoute;
-
